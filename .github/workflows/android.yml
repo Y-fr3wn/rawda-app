@@ -1,0 +1,234 @@
+name: Build Rawda APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rawda-stage1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.8'
+          channel: stable
+
+      - name: Create, check and build the starter app
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter create --platforms=android --org=com.rawda --project-name=rawda rawda
+          cd rawda
+          rm test/widget_test.dart
+          cat > lib/main.dart <<'DART'
+          import 'package:flutter/material.dart';
+          
+          void main() => runApp(const RawdaApp());
+          
+          class RawdaApp extends StatefulWidget {
+            const RawdaApp({super.key});
+          
+            @override
+            State<RawdaApp> createState() => _RawdaAppState();
+          }
+          
+          class _RawdaAppState extends State<RawdaApp> {
+            bool arabic = true;
+            bool dark = false;
+            int page = 0;
+          
+            String tr(String ar, String en) => arabic ? ar : en;
+          
+            @override
+            Widget build(BuildContext context) {
+              final colors = ColorScheme.fromSeed(
+                seedColor: const Color(0xFF536B4F),
+                brightness: dark ? Brightness.dark : Brightness.light,
+              );
+              final titles = [
+                tr('الرئيسية', 'Home'),
+                tr('العبادات', 'Worship'),
+                tr('المسابقة', 'Quiz'),
+                tr('الهدايا', 'Gifts'),
+                tr('حسابي', 'Profile'),
+              ];
+              final icons = [
+                Icons.home_outlined,
+                Icons.mosque_outlined,
+                Icons.auto_awesome_outlined,
+                Icons.card_giftcard_outlined,
+                Icons.person_outline,
+              ];
+          
+              return MaterialApp(
+                title: 'الروضة | Rawda',
+                debugShowCheckedModeBanner: false,
+                theme: ThemeData(
+                  useMaterial3: true,
+                  colorScheme: colors,
+                  scaffoldBackgroundColor:
+                      dark ? const Color(0xFF161D18) : const Color(0xFFF7F4EC),
+                  appBarTheme: const AppBarTheme(backgroundColor: Colors.transparent),
+                ),
+                builder: (context, child) => Directionality(
+                  textDirection: arabic ? TextDirection.rtl : TextDirection.ltr,
+                  child: child!,
+                ),
+                home: Scaffold(
+                  appBar: AppBar(
+                    title: Text(tr('الروضة', 'Rawda')),
+                    actions: [
+                      TextButton(
+                        key: const ValueKey('language'),
+                        onPressed: () => setState(() => arabic = !arabic),
+                        child: Text(arabic ? 'EN' : 'عربي'),
+                      ),
+                      IconButton(
+                        key: const ValueKey('theme'),
+                        tooltip: tr('تبديل المظهر', 'Switch appearance'),
+                        onPressed: () => setState(() => dark = !dark),
+                        icon: Icon(dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
+                      ),
+                    ],
+                  ),
+                  body: SafeArea(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 600),
+                        child: ListView(
+                          padding: const EdgeInsets.all(20),
+                          children: [
+                            Text(
+                              tr('خطوة صغيرة.. وأثر طيب', 'Small steps. Lasting goodness.'),
+                              style: TextStyle(color: colors.primary, fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 18),
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(28),
+                                gradient: const LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [Color(0xFF526B4F), Color(0xFF293F35)],
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(Icons.mosque_outlined, size: 64, color: Color(0xFFE8D8AD)),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    page == 0 ? tr('أهلًا بك في الروضة', 'Welcome to Rawda') : titles[page],
+                                    style: const TextStyle(fontSize: 26, color: Colors.white, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    tr('نسخة تجريبية لاختبار الشكل والتثبيت', 'A starter build for design and installation testing'),
+                                    style: const TextStyle(color: Color(0xFFE8EDE6), height: 1.7),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Card(
+                              elevation: 0,
+                              margin: EdgeInsets.zero,
+                              child: Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      page == 0 ? tr('بداية الرحلة', 'Your journey starts here') : titles[page],
+                                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      page == 0
+                                          ? tr('جرّب اللغة والوضع الليلي وشريط التنقل. بعد نجاح التثبيت نبدأ مواقيت الصلاة والأذان.', 'Try the language, appearance and navigation. Prayer times and adhan come after installation is verified.')
+                                          : tr('هذه الشاشة قيد التجهيز، وستعمل في مرحلتها القادمة.', 'This screen is a placeholder for an upcoming stage.'),
+                                      style: const TextStyle(height: 1.8),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Builder(
+                                      builder: (context) => FilledButton.icon(
+                                        onPressed: () {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text(tr('الزر يعمل؛ جرّب باقي عناصر الشاشة.', 'The button works. Try the other controls.'))),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.check_circle_outline),
+                                        label: Text(tr('اختبار الزر', 'Test button')),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                Chip(avatar: const Icon(Icons.translate, size: 18), label: Text(tr('عربي وإنجليزي', 'Arabic & English'))),
+                                Chip(avatar: const Icon(Icons.palette_outlined, size: 18), label: Text(tr('هوية الروضة', 'Rawda design'))),
+                                Chip(avatar: const Icon(Icons.build_outlined, size: 18), label: Text(tr('المرحلة ١', 'Stage 1'))),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              tr('الأذان والمواقيت والحسابات والمسابقات لم تُفعّل في هذه النسخة. اختيار اللغة والمظهر مؤقت حتى إغلاق التطبيق.', 'Adhan, prayer times, accounts and quizzes are not enabled yet. Language and appearance choices reset when the app restarts.'),
+                              style: TextStyle(fontSize: 12, height: 1.8, color: colors.onSurfaceVariant),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  bottomNavigationBar: NavigationBar(
+                    selectedIndex: page,
+                    onDestinationSelected: (value) => setState(() => page = value),
+                    destinations: List.generate(
+                      titles.length,
+                      (index) => NavigationDestination(icon: Icon(icons[index]), label: titles[index]),
+                    ),
+                  ),
+                ),
+              );
+            }
+          }
+          DART
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          manifest = Path('android/app/src/main/AndroidManifest.xml')
+          manifest.write_text(manifest.read_text().replace('android:label="rawda"', 'android:label="الروضة"'))
+          PYTHON
+          dart format lib/main.dart
+          flutter analyze
+          flutter build apk --debug
+          cp build/app/outputs/flutter-apk/app-debug.apk ../Rawda-stage1.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Rawda-stage1-APK
+          path: Rawda-stage1.apk
+          if-no-files-found: error
+          retention-days: 7
