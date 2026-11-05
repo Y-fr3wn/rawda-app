@@ -1,3 +1,26 @@
+# الروضة — سجل المتطلبات المتفق عليها، 2026-11-05
+# هذا التحديث: خطان مدمجان، شعار الاسم، حفظ اللغة والمظهر وإعداداتهما.
+# قادم: مواقيت حسب GPS أو مدينة، طريقة الحساب والعصر وضبط الدقائق والمنطقة الزمنية.
+# قادم: مكتبة أصوات أذان مرخصة، معاينة وتنزيل، مؤذن لكل صلاة، صوت محلي.
+# قادم: أذان كامل أو تكبيرات، قبل الصلاة والإقامة، اختبار الشاشة المقفولة وإعادة التشغيل.
+# قادم: قرآن 114 سورة، أجزاء، بحث، علامات، آخر قراءة، خطة ختمة، نص عثماني موثق.
+# قادم: أذكار الصباح والمساء والنوم وبعد الصلاة، قبلة، تسبيح، تقويم هجري.
+# قادم: تذكير الضحى والقيام والكهف والصيام والورد، خيارات 12/24 ساعة.
+# قادم: تسجيل إيميل إلزامي، ملف شخصي وإحصائيات وشارات ونقاط وهدايا رقمية.
+# قادم: 30 سؤالا موثقا كبداية، مستويات، مسابقة يومية وتحديات أسبوعية وترتيب.
+# نقاط تسجيل العبادات ذاتية؛ نتائج التنافس والاستبدال يتحقق منها الخادم.
+# هدايا حقيقية مشروطة بميزانية وتمويل. أندرويد أولا، آيفون لاحقا.
+# النسخة الحالية لا تشغل الأذان ولا القرآن ولا الحسابات بعد؛ القائمة خطة تنفيذ.
+# ميزات مرجعية موسعة تراجع لاحقا: أقرب مسجد ورمضان والويدجت والمكتبة والمجتمع.
+# يجب اختبار قيود النظام قبل اعتماد الصامت التلقائي والأذكار العائمة والساعات والسيارة.
+# لا نضم تسجيلات Prayer Now أو أصوله؛ نستخدم محتوى مرخصا للروضة.
+# مصادر مراجعة الوظائف:
+# https://www.prayer-now.com/en/features/
+# https://www.prayer-now.com/en/prayer-now-support-center/
+# https://www.prayer-now.com/en/knowledge_base/prayer-now-android-9-3-4-wear-os-local-adhan-and-smarter-prayer-alerts/
+# https://play.google.com/store/apps/details?id=com.AppRocks.now.prayer
+# المرحلة الحالية نسخة اختبار بتوقيع debug؛ التوقيع الدائم يجهز قبل حفظ بيانات فعلية والنشر.
+
 name: Build Rawda APK
 
 on:
@@ -36,13 +59,62 @@ jobs:
           flutter create --platforms=android --org=com.rawda --project-name=rawda rawda
           cd rawda
           rm test/widget_test.dart
+          mkdir -p assets/fonts
+          curl --fail --location --retry 3 --max-time 120 --output "assets/fonts/NotoSansArabic.ttf" "https://raw.githubusercontent.com/google/fonts/24ddc1f324cac5d9f5aedca126d298f56e3f1640/ofl/notosansarabic/NotoSansArabic%5Bwdth,wght%5D.ttf"
+          echo "63111b5b2e074dd48cc67692e0a2726d86ee94c1c37fe8598257b7b4e87e869e  assets/fonts/NotoSansArabic.ttf" | sha256sum --check
+          curl --fail --location --retry 3 --max-time 120 --output "assets/fonts/Inter.ttf" "https://raw.githubusercontent.com/google/fonts/24ddc1f324cac5d9f5aedca126d298f56e3f1640/ofl/inter/Inter%5Bopsz,wght%5D.ttf"
+          echo "29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031  assets/fonts/Inter.ttf" | sha256sum --check
+          curl --fail --location --retry 3 --max-time 120 --output "assets/fonts/Noto-OFL.txt" "https://raw.githubusercontent.com/google/fonts/24ddc1f324cac5d9f5aedca126d298f56e3f1640/ofl/notosansarabic/OFL.txt"
+          echo "07fc70bfeb985cc1a87a8587d0a0c80bab11c86c9dc3fd95b6f0cb332f983e96  assets/fonts/Noto-OFL.txt" | sha256sum --check
+          curl --fail --location --retry 3 --max-time 120 --output "assets/fonts/Inter-OFL.txt" "https://raw.githubusercontent.com/google/fonts/24ddc1f324cac5d9f5aedca126d298f56e3f1640/ofl/inter/OFL.txt"
+          echo "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57  assets/fonts/Inter-OFL.txt" | sha256sum --check
+          cat > pubspec.yaml <<'PUBSPEC'
+          name: rawda
+          description: Rawda mobile app
+          publish_to: none
+          version: 0.1.1+2
+          environment:
+            sdk: '>=3.8.0 <4.0.0'
+          dependencies:
+            flutter:
+              sdk: flutter
+            shared_preferences: 2.5.3
+          dev_dependencies:
+            flutter_lints: 5.0.0
+          flutter:
+            uses-material-design: true
+            assets:
+              - assets/fonts/Noto-OFL.txt
+              - assets/fonts/Inter-OFL.txt
+            fonts:
+              - family: RawdaArabic
+                fonts:
+                  - asset: assets/fonts/NotoSansArabic.ttf
+              - family: RawdaLatin
+                fonts:
+                  - asset: assets/fonts/Inter.ttf
+          PUBSPEC
           cat > lib/main.dart <<'DART'
           import 'package:flutter/material.dart';
+          import 'package:flutter/foundation.dart';
+          import 'package:flutter/services.dart';
+          import 'package:shared_preferences/shared_preferences.dart';
           
-          void main() => runApp(const RawdaApp());
+          Future<void> main() async {
+            WidgetsFlutterBinding.ensureInitialized();
+            final prefs = await SharedPreferences.getInstance();
+            LicenseRegistry.addLicense(() async* {
+              for (final name in ['Noto', 'Inter']) {
+                yield LicenseEntryWithLineBreaks(
+                  [name], await rootBundle.loadString('assets/fonts/$name-OFL.txt'));
+              }
+            });
+            runApp(RawdaApp(prefs: prefs));
+          }
           
           class RawdaApp extends StatefulWidget {
-            const RawdaApp({super.key});
+            const RawdaApp({super.key, required this.prefs});
+            final SharedPreferences prefs;
           
             @override
             State<RawdaApp> createState() => _RawdaAppState();
@@ -52,6 +124,60 @@ jobs:
             bool arabic = true;
             bool dark = false;
             int page = 0;
+          
+            @override
+            void initState() {
+              super.initState();
+              arabic = widget.prefs.getBool('arabic') ?? true;
+              dark = widget.prefs.getBool('dark') ?? false;
+            }
+          
+            Future<void> changeLanguage(bool value) async {
+              setState(() => arabic = value);
+              await widget.prefs.setBool('arabic', value);
+            }
+          
+            Future<void> changeTheme(bool value) async {
+              setState(() => dark = value);
+              await widget.prefs.setBool('dark', value);
+            }
+          
+            Widget settingsBody(ColorScheme colors) => ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                Text(tr('إعداداتك', 'Your preferences'),
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                Card(child: Column(children: [
+                  SwitchListTile(
+                    title: Text(tr('اللغة العربية', 'Arabic language')),
+                    subtitle: const Text('العربية / English'),
+                    value: arabic, onChanged: changeLanguage),
+                  const Divider(height: 1),
+                  SwitchListTile(
+                    title: Text(tr('الوضع الليلي', 'Dark appearance')),
+                    value: dark, onChanged: changeTheme),
+                ])),
+                const SizedBox(height: 12),
+                Text(tr('اختياراتك محفوظة على هذا الجهاز.', 'Your preferences are saved on this device.'),
+                  style: TextStyle(color: colors.onSurfaceVariant)),
+                const SizedBox(height: 24),
+                Text(tr('في التحديثات القادمة', 'In upcoming updates'),
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+                for (final item in [
+                  tr('الموقع وطريقة حساب المواقيت', 'Location and prayer calculation'),
+                  tr('صوت المؤذن وإعدادات كل صلاة', 'Muezzin and per-prayer options'),
+                  tr('الأذان والإقامة والتذكيرات', 'Adhan, iqama and reminders'),
+                  tr('القرآن والختمة وحجم خط المصحف', 'Quran, khatma and reading size'),
+                ]) ListTile(leading: const Icon(Icons.schedule_outlined), title: Text(item)),
+                const SizedBox(height: 12),
+                Builder(builder: (context) => TextButton.icon(
+                  onPressed: () => showLicensePage(context: context,
+                    applicationName: tr('الروضة', 'Rawda'), applicationVersion: '0.1.1'),
+                  icon: const Icon(Icons.info_outline),
+                  label: Text(tr('عن الروضة وتراخيص الخطوط', 'About Rawda and font licenses')))),
+              ],
+            );
           
             String tr(String ar, String en) => arabic ? ar : en;
           
@@ -81,6 +207,8 @@ jobs:
                 debugShowCheckedModeBanner: false,
                 theme: ThemeData(
                   useMaterial3: true,
+                  fontFamily: arabic ? 'RawdaArabic' : 'RawdaLatin',
+                  fontFamilyFallback: const ['RawdaArabic', 'RawdaLatin'],
                   colorScheme: colors,
                   scaffoldBackgroundColor:
                       dark ? const Color(0xFF161D18) : const Color(0xFFF7F4EC),
@@ -92,17 +220,44 @@ jobs:
                 ),
                 home: Scaffold(
                   appBar: AppBar(
-                    title: Text(tr('الروضة', 'Rawda')),
+                    toolbarHeight: 76,
+                    titleSpacing: 16,
+                    title: page == 5
+                        ? Text(tr('الإعدادات', 'Settings'))
+                        : Row(children: [
+                            Container(
+                              width: 38, height: 42,
+                              decoration: BoxDecoration(
+                                color: dark ? const Color(0xFF293F35) : const Color(0xFFECE7D7),
+                                borderRadius: const BorderRadius.vertical(top: Radius.circular(22), bottom: Radius.circular(9)),
+                                border: Border.all(color: const Color(0xFFB49A60), width: 1)),
+                              child: Icon(Icons.mosque_outlined, size: 25,
+                                color: dark ? const Color(0xFFE8D8AD) : const Color(0xFF536B4F))),
+                            const SizedBox(width: 8),
+                            Flexible(child: FittedBox(fit: BoxFit.scaleDown,
+                              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                Text(tr('الروضة', 'Rawda'),
+                                  style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w700, height: 1.6)),
+                                Container(width: 32, height: 2, color: const Color(0xFFB49A60)),
+                              ]))),
+                          ]),
+                    leading: page == 5 ? IconButton(
+                      tooltip: tr('الرئيسية', 'Home'), icon: const BackButtonIcon(),
+                      onPressed: () => setState(() => page = 0)) : null,
                     actions: [
+                      if (page != 5) IconButton(
+                        tooltip: tr('الإعدادات', 'Settings'),
+                        icon: const Icon(Icons.settings_outlined),
+                        onPressed: () => setState(() => page = 5)),
                       TextButton(
                         key: const ValueKey('language'),
-                        onPressed: () => setState(() => arabic = !arabic),
+                        onPressed: () => changeLanguage(!arabic),
                         child: Text(arabic ? 'EN' : 'عربي'),
                       ),
                       IconButton(
                         key: const ValueKey('theme'),
                         tooltip: tr('تبديل المظهر', 'Switch appearance'),
-                        onPressed: () => setState(() => dark = !dark),
+                        onPressed: () => changeTheme(!dark),
                         icon: Icon(dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
                       ),
                     ],
@@ -111,7 +266,7 @@ jobs:
                     child: Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 600),
-                        child: ListView(
+                        child: page == 5 ? settingsBody(colors) : ListView(
                           padding: const EdgeInsets.all(20),
                           children: [
                             Text(
@@ -140,7 +295,7 @@ jobs:
                                   ),
                                   const SizedBox(height: 10),
                                   Text(
-                                    tr('نسخة تجريبية لاختبار الشكل والتثبيت', 'A starter build for design and installation testing'),
+                                    tr('رفيق يومك، بخطوة مطمئنة', 'A little more peace in every day'),
                                     style: const TextStyle(color: Color(0xFFE8EDE6), height: 1.7),
                                   ),
                                 ],
@@ -162,7 +317,7 @@ jobs:
                                     const SizedBox(height: 10),
                                     Text(
                                       page == 0
-                                          ? tr('جرّب اللغة والوضع الليلي وشريط التنقل. بعد نجاح التثبيت نبدأ مواقيت الصلاة والأذان.', 'Try the language, appearance and navigation. Prayer times and adhan come after installation is verified.')
+                                          ? tr('خط أوضح وهوية جديدة للروضة. يمكنك حفظ اللغة والمظهر من الإعدادات، ومتابعة تطوير رحلتك معنا.', 'A clearer typeface and a new Rawda identity. Save your language and appearance in Settings as we build the next steps.')
                                           : tr('هذه الشاشة قيد التجهيز، وستعمل في مرحلتها القادمة.', 'This screen is a placeholder for an upcoming stage.'),
                                       style: const TextStyle(height: 1.8),
                                     ),
@@ -189,12 +344,12 @@ jobs:
                               children: [
                                 Chip(avatar: const Icon(Icons.translate, size: 18), label: Text(tr('عربي وإنجليزي', 'Arabic & English'))),
                                 Chip(avatar: const Icon(Icons.palette_outlined, size: 18), label: Text(tr('هوية الروضة', 'Rawda design'))),
-                                Chip(avatar: const Icon(Icons.build_outlined, size: 18), label: Text(tr('المرحلة ١', 'Stage 1'))),
+                                Chip(avatar: const Icon(Icons.build_outlined, size: 18), label: Text(tr('الإصدار ٠٫١٫١', 'Version 0.1.1'))),
                               ],
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              tr('الأذان والمواقيت والحسابات والمسابقات لم تُفعّل في هذه النسخة. اختيار اللغة والمظهر مؤقت حتى إغلاق التطبيق.', 'Adhan, prayer times, accounts and quizzes are not enabled yet. Language and appearance choices reset when the app restarts.'),
+                              tr('الأذان والمواقيت والحسابات والمسابقات لم تُفعّل في هذه النسخة. اللغة والمظهر محفوظان على جهازك.', 'Adhan, prayer times, accounts and quizzes are not enabled yet. Language and appearance choices are saved on your device.'),
                               style: TextStyle(fontSize: 12, height: 1.8, color: colors.onSurfaceVariant),
                             ),
                           ],
@@ -203,7 +358,7 @@ jobs:
                     ),
                   ),
                   bottomNavigationBar: NavigationBar(
-                    selectedIndex: page,
+                    selectedIndex: page == 5 ? 0 : page,
                     onDestinationSelected: (value) => setState(() => page = value),
                     destinations: List.generate(
                       titles.length,
@@ -220,15 +375,16 @@ jobs:
           manifest = Path('android/app/src/main/AndroidManifest.xml')
           manifest.write_text(manifest.read_text().replace('android:label="rawda"', 'android:label="الروضة"'))
           PYTHON
+          flutter pub get
           dart format lib/main.dart
           flutter analyze
           flutter build apk --debug
-          cp build/app/outputs/flutter-apk/app-debug.apk ../Rawda-stage1.apk
+          cp build/app/outputs/flutter-apk/app-debug.apk ../Rawda-design-0.1.1.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Rawda-stage1-APK
-          path: Rawda-stage1.apk
+          name: Rawda-design-0.1.1-APK
+          path: Rawda-design-0.1.1.apk
           if-no-files-found: error
           retention-days: 7
