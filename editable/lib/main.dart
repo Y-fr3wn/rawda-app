@@ -1253,6 +1253,12 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
       MaterialPageRoute<void>(
         builder: (context) => Scaffold(
           appBar: AppBar(title: Text(title)),
+          bottomNavigationBar: title.startsWith('سورة ') ||
+                  title.startsWith('Surah ')
+              ? null
+              : buildMainNavigation(
+                  selected: title == tr('القرآن الكريم', 'Holy Quran')
+                      ? 0 : page),
           body: SafeArea(
             child: Center(
               child: ConstrainedBox(
@@ -1538,21 +1544,31 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
                   ),
                 ),
               ),
-              bottomNavigationBar: NavigationBar(
-                selectedIndex: page,
-                onDestinationSelected: showMainTab,
-                destinations: [
-                  for (final item in [
-                    (Icons.menu_book_outlined, tr('القرآن', 'Quran')),
-                     (Icons.auto_awesome_outlined, tr('المسابقة', 'Quiz')),
-                     (Icons.home_rounded, tr('الرئيسية', 'Home')),
-                     (Icons.wb_sunny_outlined, tr('اليوم', 'Today')),
-                     (Icons.person_outline, tr('الحساب', 'Account')),
-                  ])
-                    NavigationDestination(icon: Icon(item.$1), label: item.$2),
-                ],
-              ),
+              bottomNavigationBar: buildMainNavigation(),
             ),
+    );
+  }
+
+  Widget buildMainNavigation({int? selected}) {
+    return NavigationBar(
+      selectedIndex: selected ?? page,
+      onDestinationSelected: (index) {
+        nav.currentState?.popUntil((route) => route.isFirst);
+        showMainTab(index);
+      },
+      destinations: [
+        for (final item in [
+          (Icons.menu_book_outlined, tr('القرآن', 'Quran')),
+          (Icons.auto_awesome_outlined, tr('المسابقة', 'Quiz')),
+          (Icons.home_rounded, tr('الرئيسية', 'Home')),
+          (Icons.wb_sunny_outlined, tr('اليوم', 'Today')),
+          (Icons.person_outline, tr('الحساب', 'Account')),
+        ])
+          NavigationDestination(
+            icon: Icon(item.$1),
+            label: item.$2,
+          ),
+      ],
     );
   }
 
