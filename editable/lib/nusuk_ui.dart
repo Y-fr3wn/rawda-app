@@ -379,6 +379,7 @@ extension NusukInspiredRawda on RawdaState {
         SizedBox(
           height: 100,
           child: ListView.separated(
+            key: const Key('rawda-prayer-strip'),
             scrollDirection: Axis.horizontal,
             itemCount: prayerKeys.length,
             separatorBuilder: (_, __) => const SizedBox(width: 8),
