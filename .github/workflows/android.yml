@@ -84,6 +84,16 @@ jobs:
       - name: Build Firebase debug APK
         working-directory: rawda
         run: flutter build apk --debug --no-pub --dart-define=RAWDA_USE_FIREBASE=true --dart-define=RAWDA_FIREBASE_EMAIL_RETURN=true
+      - name: Build optimized profile APK (AOT for smoother UI)
+        working-directory: rawda
+        run: flutter build apk --profile --no-pub --dart-define=RAWDA_USE_FIREBASE=true --dart-define=RAWDA_FIREBASE_EMAIL_RETURN=true
+      - name: Upload optimized installable APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Rawda-1.4.5-FAST-APK
+          path: rawda/build/app/outputs/flutter-apk/app-profile.apk
+          if-no-files-found: error
+          retention-days: 14
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:

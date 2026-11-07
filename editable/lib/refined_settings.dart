@@ -141,7 +141,8 @@ extension RefinedRawdaSettings on RawdaState {
             tr('اختر إضاءة مريحة لعينيك', 'Comfortable display at night'),
             Icons.dark_mode_outlined, dark,
             (v) {
-              setState(() => dark = v);
+              dark = v;
+              refreshSettings();
               update(() {});
               prefs.setBool('dark', v);
             },
@@ -151,7 +152,8 @@ extension RefinedRawdaSettings on RawdaState {
             tr('غيّر لغة التطبيق', 'Change app language'),
             Icons.language_rounded, ar,
             (v) {
-              setState(() => ar = v);
+              ar = v;
+              refreshSettings();
               update(() {});
               prefs.setBool('arabic', v);
               schedule();
@@ -244,7 +246,8 @@ extension RefinedRawdaSettings on RawdaState {
             Icons.account_circle_outlined,
             () {
               Navigator.of(context).pop();
-              setState(() => page = 4);
+              page = 4;
+              refreshSettings();
             },
           ),
           if (isAdmin) _settingsTile(

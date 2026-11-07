@@ -139,6 +139,11 @@ class Rawda extends StatefulWidget {
 }
 
 class RawdaState extends State<Rawda> with WidgetsBindingObserver {
+  // Keep protected Flutter state changes inside the State subclass.
+  void refreshSettings() {
+    if (mounted) setState(() {});
+  }
+
   final nav = GlobalKey<NavigatorState>();
   final messenger = GlobalKey<ScaffoldMessengerState>();
   late final SharedPreferences prefs = widget.prefs;
