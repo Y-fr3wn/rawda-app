@@ -30,7 +30,12 @@ jobs:
           test -f rawda/lib/main.dart
           if [ -d editable/lib ]; then
             cp -R editable/lib/. rawda/lib/
+            rm -rf rawda/lib/lib
             echo 'Applied redesigned Rawda Flutter UI from editable/lib.'
+          fi
+          if [ -f editable/test/app_test.dart ]; then
+            cp editable/test/app_test.dart rawda/test/app_test.dart
+            echo 'Using updated visual navigation regression test.'
           fi
       - name: Set up Java
         uses: actions/setup-java@v4
