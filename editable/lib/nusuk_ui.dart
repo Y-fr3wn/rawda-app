@@ -198,12 +198,6 @@ extension NusukInspiredRawda on RawdaState {
 
   Widget nusukInspiredHome() {
     final next = upcoming.isEmpty ? null : upcoming.first;
-    final remaining = next == null
-        ? Duration.zero
-        : (next['at'] as DateTime).difference(now);
-    final safe = remaining.isNegative ? Duration.zero : remaining;
-    final countdown =
-        "${safe.inHours.toString().padLeft(2, '0')}:${(safe.inMinutes % 60).toString().padLeft(2, '0')}:${(safe.inSeconds % 60).toString().padLeft(2, '0')}";
     final displayName = (account['profile']?['display_name'] ??
             tr('صديق الروضة', 'Rawda friend'))
         .toString();
@@ -346,13 +340,32 @@ extension NusukInspiredRawda on RawdaState {
                                 Text(tr('المتبقي على الأذان', 'Time until adhan'),
                                     style: const TextStyle(
                                         color: Colors.white70, fontSize: 10)),
-                                Text(next == null ? '--:--:--' : countdown,
-                                    textDirection: TextDirection.ltr,
-                                    style: const TextStyle(
+                                ValueListenableBuilder<DateTime>(
+                                  valueListenable: clockTick,
+                                  builder: (context, tick, child) {
+                                    final nextPrayer = upcoming.isEmpty
+                                        ? null : upcoming.first;
+                                    final remaining = nextPrayer == null
+                                        ? Duration.zero
+                                        : (nextPrayer['at'] as DateTime)
+                                            .difference(tick);
+                                    final safe = remaining.isNegative
+                                        ? Duration.zero : remaining;
+                                    final text = nextPrayer == null
+                                        ? '--:--:--'
+                                        : "${safe.inHours.toString().padLeft(2, '0')}:${(safe.inMinutes % 60).toString().padLeft(2, '0')}:${(safe.inSeconds % 60).toString().padLeft(2, '0')}";
+                                    return Text(
+                                      text,
+                                      textDirection: TextDirection.ltr,
+                                      style: const TextStyle(
                                         fontFamily: 'RawdaLatin',
                                         color: Colors.white,
                                         fontSize: 26,
-                                        fontWeight: FontWeight.w700)),
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    );
+                                  },
+                                ),
                               ],
                             ),
                           ),

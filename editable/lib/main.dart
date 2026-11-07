@@ -21,6 +21,7 @@ import 'package:url_launcher/url_launcher.dart';
 part 'premium.dart';
 part 'admin.dart';
 part 'nusuk_ui.dart';
+part 'refined_settings.dart';
 
 const bridge = MethodChannel('com.rawda/native');
 const sensors = EventChannel('com.rawda/compass');
@@ -375,6 +376,10 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
           page == 2 &&
           (nav.currentState?.canPop() != true)) {
         clockTick.value = now;
+      }
+      if (signed && ready && page == 2 && now.second == 0 &&
+          (nav.currentState?.canPop() != true)) {
+        setState(() {});
       }
       if (signed && now.second % 5 == 0) status();
     });
@@ -1302,21 +1307,27 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: scheme,
+        colorScheme: scheme.copyWith(
+          primary: seed,
+          secondary: rawdaGold,
+          surface: dark ? const Color(0xFF1B3028) : const Color(0xFFFFFBF2),
+          onSurface: dark ? const Color(0xFFF5EEE0) : const Color(0xFF193C32),
+        ),
         fontFamily: ar ? 'RawdaArabic' : 'RawdaLatin',
         fontFamilyFallback: const ['RawdaArabic', 'RawdaLatin'],
         scaffoldBackgroundColor: dark
             ? const Color(0xFF161D18)
             : const Color(0xFFF7F4EC),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.transparent,
-          centerTitle: false,
+        appBarTheme: AppBarTheme(
+          backgroundColor: dark ? const Color(0xFF162D26) : const Color(0xFFFFFBF2),
+          foregroundColor: dark ? const Color(0xFFF2DBAD) : rawdaGreen,
+          centerTitle: true,
           scrolledUnderElevation: 0,
           titleTextStyle: TextStyle(
-            fontFamily: 'RawdaArabic',
-            fontWeight: FontWeight.w700,
-            fontSize: 20,
-            color: rawdaGold,
+            fontFamily: ar ? 'RawdaArabic' : 'RawdaLatin',
+            fontWeight: FontWeight.w800,
+            fontSize: 19,
+            color: dark ? const Color(0xFFF2DBAD) : rawdaGreen,
           ),
         ),
         navigationBarTheme: NavigationBarThemeData(
@@ -1324,7 +1335,13 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
               ? const Color(0xFF14271F)
               : const Color(0xFFFFFCF4),
           indicatorColor: rawdaGold.withValues(alpha: .22),
-          height: 76,
+          height: 74,
+          labelTextStyle: const WidgetStatePropertyAll(
+            TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+          ),
+          iconTheme: WidgetStatePropertyAll(
+            IconThemeData(color: dark ? const Color(0xFFEBD9B7) : rawdaGreen),
+          ),
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
@@ -1461,10 +1478,7 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
                             child: KeyedSubtree(
                               key: ValueKey(page),
                               child: page == 2
-                                   ? ValueListenableBuilder<DateTime>(
-                                      valueListenable: clockTick,
-                                      builder: (context, tick, child) => home(),
-                                    )
+                                  ? home()
                                   : [
                                       nusukInspiredQuran,
                                       quizBody,
@@ -2178,75 +2192,7 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
     push(
       tr('الإعدادات', 'Settings'),
       (context) => StatefulBuilder(
-        builder: (context, update) => wrapList([
-          tile(
-            tr(
-              'إشعارات الصلاة وصوت الإقامة',
-              'Prayer notifications & iqama voice',
-            ),
-            Icons.notifications_active_outlined,
-            openPrayerNotifications,
-          ),
-          SwitchListTile(
-            title: Text(tr('الوضع الليلي', 'Dark mode')),
-            value: dark,
-            onChanged: (v) {
-              setState(() => dark = v);
-              update(() {});
-              prefs.setBool('dark', v);
-            },
-          ),
-          SwitchListTile(
-            title: Text(tr('اللغة العربية', 'Arabic language')),
-            value: ar,
-            onChanged: (v) {
-              setState(() => ar = v);
-              update(() {});
-              prefs.setBool('arabic', v);
-              schedule();
-            },
-          ),
-          SwitchListTile(
-            title: Text(tr('نظام ٢٤ ساعة', '24-hour clock')),
-            value: config['clock24'] == true,
-            onChanged: (v) {
-              config['clock24'] = v;
-              persistConfig();
-              update(() {});
-            },
-          ),
-          tile(
-            tr('الموقع وحساب الصلاة', 'Location & calculation'),
-            Icons.location_on_outlined,
-            prayerSettings,
-          ),
-          tile(
-            tr('أصوات الأذان وإعدادات كل صلاة', 'Adhan voices & each prayer'),
-            Icons.volume_up_outlined,
-            openAudio,
-          ),
-          tile(
-            tr('التذكيرات', 'Reminders'),
-            Icons.notifications_outlined,
-            openReminders,
-          ),
-          tile(
-            tr('صلاحيات التنبيهات واختبار الأذان', 'Alarm permissions & test'),
-            Icons.alarm_outlined,
-            openPermissions,
-          ),
-          if (isAdmin)
-            tile(
-              tr('لوحة إدارة الروضة', 'Rawda administration'),
-              Icons.admin_panel_settings_outlined,
-              openAdmin,
-            ),
-          tile(
-            tr('عن الروضة والمصادر', 'About & sources'),
-            Icons.info_outline,
-            about,
-          ),
-        ]),
+        builder: (context, update) => refinedSettingsPage(context, update),
       ),
     );
   }
