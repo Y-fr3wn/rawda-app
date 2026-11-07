@@ -34,6 +34,18 @@ void main() {
     tzdata.initializeTimeZones();
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
+    // The Android app-links plugin has no native implementation in widget tests.
+    // Accept event stream subscriptions without masking genuine UI failures.
+    final testMessenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    testMessenger.setMockMethodCallHandler(
+      const MethodChannel('com.llfbandit.app_links/events'),
+      (call) async => null,
+    );
+    testMessenger.setMockMethodCallHandler(
+      const MethodChannel('com.llfbandit.app_links/messages'),
+      (call) async => null,
+    );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(bridge, (call) async {
           if (call.method == 'schedule') {
