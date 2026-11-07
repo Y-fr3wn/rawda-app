@@ -258,7 +258,7 @@ extension NusukInspiredRawda on RawdaState {
         ClipRRect(
           borderRadius: BorderRadius.circular(29),
           child: SizedBox(
-            height: 300,
+            height: 350,
             child: Stack(
               children: [
                 const Positioned.fill(
@@ -311,7 +311,7 @@ extension NusukInspiredRawda on RawdaState {
                       const SizedBox(height: 4),
                       Text(
                         next == null
-                            ? tr('أهلاً بك في الروضة', 'Welcome to Rawda')
+                            ? tr('أهلًا بك في الروضة', 'Welcome to Rawda')
                             : (ar
                                 ? prayerArabic[next['index'] as int]
                                 : prayerKeys[next['index'] as int]),
