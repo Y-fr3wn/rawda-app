@@ -611,11 +611,10 @@ extension NusukInspiredRawda on RawdaState {
                 )),
             ),
             title: Text(ar
-                ? 'سورة ' + chapter['name_arabic'].toString()
-                : 'Surah ' + chapter['name_simple'].toString(),
+                ? "سورة ${chapter['name_arabic']}"
+                : "Surah ${chapter['name_simple']}",
               style: const TextStyle(fontWeight: FontWeight.w700)),
-            subtitle: Text(chapter['verses_count'].toString() +
-              ' ' + tr('آية', 'verses'),
+            subtitle: Text("${chapter['verses_count']} ${tr('آية', 'verses')}",
               style: const TextStyle(fontSize: 11)),
             trailing: const Icon(Icons.menu_book_rounded,
               size: 27, color: rawdaGold),

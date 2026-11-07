@@ -92,7 +92,7 @@ extension RawdaVisualKit on RawdaState {
                 color: dark ? const Color(0xFFF4DFB4) : rawdaGreen,
               )),
             const SizedBox(height: 9),
-            Text(chapterName + ' • ' + selected.$2.toString(),
+            Text('$chapterName • ${selected.$2}',
                 style: const TextStyle(color: rawdaGold,
                   fontSize: 12, fontWeight: FontWeight.w700)),
           ]),
@@ -209,7 +209,7 @@ class _RawdaTasbihViewState extends State<RawdaTasbihView> {
     app.state['tasbihWord'] = word;
     if (app.uid.isNotEmpty) {
       unawaited(app.prefs.setString(
-          'state:' + app.uid, jsonEncode(app.state)));
+          'state:${app.uid}', jsonEncode(app.state)));
     }
   }
 
@@ -330,7 +330,7 @@ class _RawdaTasbihViewState extends State<RawdaTasbihView> {
                           color: app.dark
                               ? const Color(0xFFF4DFB4) : rawdaGreen,
                         )),
-                        Text(app.tr('من', 'of') + ' $goal',
+                        Text("${app.tr('من', 'of')} $goal",
                             style: const TextStyle(
                               color: rawdaGold, fontSize: 13,
                               fontWeight: FontWeight.w700,
@@ -486,7 +486,7 @@ class RawdaCompassFace extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Qibla bearing ' + bearing.toStringAsFixed(1),
+      label: 'Qibla bearing ${bearing.toStringAsFixed(1)}',
       child: SizedBox(
         width: 285, height: 285,
         child: CustomPaint(painter: RawdaCompassPainter(
