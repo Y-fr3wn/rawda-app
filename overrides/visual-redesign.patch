@@ -1,0 +1,606 @@
+diff --git a/rawda/CHANGELOG_1_4_4_AR.md b/rawda/CHANGELOG_1_4_4_AR.md
+new file mode 100644
+index 0000000..f549472
+--- /dev/null
++++ b/rawda/CHANGELOG_1_4_4_AR.md
+@@ -0,0 +1,13 @@
++# الروضة 1.4.4 — تحديث الواجهات المستوحى من نسك
++
++- الرئيسية الجديدة بخلفية أصلية للمسجد النبوي، تدرجات بيج وأخضر وذهبي، وترحيب شخصي.
++- بطاقة منفصلة للصلاة القادمة والعد التنازلي حسب المنطقة الزمنية المهيأة، بما فيها أفريقيا/القاهرة.
++- ستة اختصارات حقيقية للقرآن ومواقيت الصلاة والأذكار والقبلة والمسابقات والورد.
++- تجديد شبكة الخدمات في شاشة الصلاة، وتحديث شاشة الدخول وقائمة السور إلى بطاقات أكثر وضوحًا.
++- تحسين شريط التنقل والخطوط دون حذف أقسام المسابقة والهدايا والحساب.
++- لم تتغير بنية قاعدة بيانات Firebase أو قواعد تسجيل الدخول أو خدمات الأذان.
++- إصدار تجربة: يلزم نجاح بناء APK واختباره على الهاتف قبل التوزيع.
++
++## التصميم والأصول
++
++الصورة الأساسية صورة مولّدة خصيصًا للروضة؛ لا تستخدم أصول نسك أو علامته التجارية.
+diff --git a/rawda/lib/main.dart b/rawda/lib/main.dart
+index 5351be8..82f2c3d 100644
+--- a/rawda/lib/main.dart
++++ b/rawda/lib/main.dart
+@@ -19,6 +19,7 @@ import 'package:shared_preferences/shared_preferences.dart';
+ import 'package:supabase_flutter/supabase_flutter.dart';
+ import 'package:url_launcher/url_launcher.dart';
+ part 'premium.dart';
++part 'nusuk_ui.dart';
+ part 'admin.dart';
+ 
+ const bridge = MethodChannel('com.rawda/native');
+@@ -1305,8 +1306,8 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
+         fontFamily: ar ? 'RawdaArabic' : 'RawdaLatin',
+         fontFamilyFallback: const ['RawdaArabic', 'RawdaLatin'],
+         scaffoldBackgroundColor: dark
+-            ? const Color(0xFF161D18)
+-            : const Color(0xFFF7F4EC),
++            ? const Color(0xFF111E1A)
++            : const Color(0xFFF9F6EF),
+         appBarTheme: const AppBarTheme(
+           backgroundColor: Colors.transparent,
+           centerTitle: false,
+@@ -1324,6 +1325,8 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
+               : const Color(0xFFFFFCF4),
+           indicatorColor: rawdaGold.withValues(alpha: .22),
+           height: 76,
++          labelTextStyle: WidgetStateProperty.all(const TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
++          iconTheme: WidgetStateProperty.all(const IconThemeData(size: 23)),
+         ),
+         filledButtonTheme: FilledButtonThemeData(
+           style: FilledButton.styleFrom(
+@@ -1411,12 +1414,18 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
+                 toolbarHeight: 76,
+                 title: Row(
+                   children: [
+-                    Image.asset('assets/logo.png', width: 40, height: 40),
+-                    const SizedBox(width: 10),
+-                    Text(
+-                      tr('الروضة', 'Rawda'),
+-                      style: const TextStyle(fontWeight: FontWeight.w700),
++                    ClipRRect(
++                      borderRadius: BorderRadius.circular(14),
++                      child: Image.asset('assets/logo.png', width: 43, height: 43),
+                     ),
++                    const SizedBox(width: 10),
++                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
++                      Text(tr('الروضة', 'Rawda'), maxLines: 1, overflow: TextOverflow.ellipsis,
++                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 21, color: dark ? rawdaGold : rawdaGreen)),
++                      Text(tr('رفيق يومك إلى الطمأنينة', 'Your companion to peace'),
++                        maxLines: 1, overflow: TextOverflow.ellipsis,
++                        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 9, color: rawdaGold)),
++                    ])),
+                   ],
+                 ),
+                 actions: [
+@@ -1487,11 +1496,11 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
+                 },
+                 destinations: [
+                   for (final item in [
+-                    (Icons.home_outlined, tr('الرئيسية', 'Home')),
+-                    (Icons.mosque_outlined, tr('العبادات', 'Worship')),
+-                    (Icons.auto_awesome_outlined, tr('المسابقة', 'Quiz')),
+-                    (Icons.card_giftcard_outlined, tr('الهدايا', 'Gifts')),
+-                    (Icons.person_outline, tr('حسابي', 'Profile')),
++                    (Icons.home_rounded, tr('الرئيسية', 'Home')),
++                    (Icons.mosque_rounded, tr('الصلاة', 'Prayer')),
++                    (Icons.emoji_events_outlined, tr('المسابقة', 'Quiz')),
++                    (Icons.redeem_rounded, tr('الهدايا', 'Rewards')),
++                    (Icons.person_rounded, tr('حسابي', 'Profile')),
+                   ])
+                     NavigationDestination(icon: Icon(item.$1), label: item.$2),
+                 ],
+@@ -1501,7 +1510,7 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
+   }
+ 
+   Widget home() =>
+-      RefreshIndicator(onRefresh: loadAccount, child: premiumHome());
++      RefreshIndicator(onRefresh: loadAccount, child: nusukHome());
+ 
+   Widget worship() => wrapList([
+     heading(tr('لحظات من الطمأنينة', 'Moments of peace')),
+@@ -3192,7 +3201,14 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
+                 child: ListView(
+                   children: [
+                     if (query.isEmpty) ...[
++                      Padding(
++                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
++                        child: sectionHero(tr('القرآن الكريم', 'The Holy Quran'),
++                          tr('١١٤ سورة • قراءة واستماع وخطة ختمة', '114 surahs • read, listen and follow your khatma'),
++                          Icons.menu_book_rounded),
++                      ),
+                       ListTile(
++                        leading: const Icon(Icons.bookmark_added_outlined, color: rawdaGold),
+                         title: Text(tr('آخر قراءة', 'Last reading')),
+                         subtitle: Text(
+                           state['lastSurah'] == null
+@@ -3226,20 +3242,33 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
+                           ) ||
+                           '${v['id']}' == query,
+                     ))
+-                      ListTile(
+-                        onTap: () => openSurah(chapter['id'] as int),
+-                        leading: CircleAvatar(child: Text('${chapter['id']}')),
+-                        title: Text(
+-                          ar
+-                              ? 'سورة ${chapter['name_arabic']}'
+-                              : 'Surah ${chapter['name_simple']}',
+-                        ),
+-                        subtitle: Text(
+-                          '${chapter['verses_count']} ${tr('آية', 'verses')}',
+-                        ),
+-                        trailing: TextButton(
+-                          onPressed: () => openSurah(chapter['id'] as int),
+-                          child: Text(tr('قراءة', 'Read')),
++                      Card(
++                        margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
++                        child: ListTile(
++                          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
++                          onTap: () => openSurah(chapter['id'] as int),
++                          leading: Container(
++                            width: 45, height: 45,
++                            decoration: BoxDecoration(
++                              border: Border.all(color: rawdaGold.withValues(alpha: .50)),
++                              color: rawdaGold.withValues(alpha: .10),
++                              borderRadius: BorderRadius.circular(15),
++                            ),
++                            alignment: Alignment.center,
++                            child: Text('${chapter['id']}', style: const TextStyle(
++                              fontFamily: 'RawdaLatin', color: rawdaGreen, fontWeight: FontWeight.bold)),
++                          ),
++                          title: Text(
++                            ar ? 'سورة ${chapter['name_arabic']}' : 'Surah ${chapter['name_simple']}',
++                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
++                          ),
++                          subtitle: Text('${chapter['verses_count']} ${tr('آية', 'verses')}',
++                            style: const TextStyle(fontSize: 11)),
++                          trailing: IconButton(
++                            tooltip: tr('قراءة السورة', 'Read surah'),
++                            onPressed: () => openSurah(chapter['id'] as int),
++                            icon: const Icon(Icons.menu_book_outlined, color: rawdaGold),
++                          ),
+                         ),
+                       ),
+                     if (query.isNotEmpty) ...[
+diff --git a/rawda/lib/nusuk_ui.dart b/rawda/lib/nusuk_ui.dart
+new file mode 100644
+index 0000000..b94cf1d
+--- /dev/null
++++ b/rawda/lib/nusuk_ui.dart
+@@ -0,0 +1,313 @@
++part of 'main.dart';
++
++// A Rawda-original interpretation of modern pilgrimage-app navigation.
++// All controls invoke existing Rawda functions: no placeholder tiles.
++extension RawdaJourneyHome on RawdaState {
++  Widget _journeyHeading(String title, String subtitle, {VoidCallback? onMore}) {
++    return Padding(
++      padding: const EdgeInsets.only(top: 20, bottom: 13),
++      child: Row(
++        crossAxisAlignment: CrossAxisAlignment.center,
++        children: [
++          Expanded(
++            child: Column(
++              crossAxisAlignment: CrossAxisAlignment.start,
++              children: [
++                Text(title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800)),
++                const SizedBox(height: 3),
++                Text(subtitle, style: TextStyle(fontSize: 11, color: Theme.of(nav.currentContext!).colorScheme.onSurfaceVariant)),
++              ],
++            ),
++          ),
++          if (onMore != null)
++            TextButton.icon(
++              onPressed: onMore,
++              icon: const Icon(Icons.arrow_forward_ios_rounded, size: 12),
++              label: Text(tr('عرض الكل', 'See all'), style: const TextStyle(fontSize: 11)),
++            ),
++        ],
++      ),
++    );
++  }
++
++  Widget _journeyAction(String title, IconData icon, VoidCallback onPressed, Color tint) {
++    return Material(
++      color: dark ? const Color(0xFF203B32) : const Color(0xFFFFFFFF),
++      borderRadius: BorderRadius.circular(20),
++      child: InkWell(
++        onTap: onPressed,
++        borderRadius: BorderRadius.circular(20),
++        child: Container(
++          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 14),
++          decoration: BoxDecoration(
++            border: Border.all(color: rawdaGold.withValues(alpha: .18)),
++            borderRadius: BorderRadius.circular(20),
++          ),
++          child: Column(
++            mainAxisSize: MainAxisSize.min,
++            children: [
++              Container(
++                width: 49,
++                height: 49,
++                decoration: BoxDecoration(color: tint.withValues(alpha: dark ? .25 : .10), borderRadius: BorderRadius.circular(17)),
++                child: Icon(icon, color: dark ? rawdaGold : tint, size: 25),
++              ),
++              const SizedBox(height: 10),
++              Text(title, textAlign: TextAlign.center, maxLines: 2,
++                  overflow: TextOverflow.ellipsis,
++                  style: const TextStyle(fontSize: 11, height: 1.5, fontWeight: FontWeight.w700)),
++            ],
++          ),
++        ),
++      ),
++    );
++  }
++
++  Widget journeyQuickActions() {
++    const sage = Color(0xFF315C4C);
++    const bronze = Color(0xFF9F7B41);
++    const warm = Color(0xFFB57948);
++    const sea = Color(0xFF4D7672);
++    final items = <(String, IconData, VoidCallback, Color)>[
++      (tr('القرآن الكريم', 'Holy Quran'), Icons.menu_book_rounded, openQuran, sage),
++      (tr('مواقيت الصلاة', 'Prayer times'), Icons.mosque_outlined, openPrayerMonth, bronze),
++      (tr('الأذكار', 'Daily adhkar'), Icons.spa_outlined, () => openAdhkar('morning'), sea),
++      (tr('اتجاه القبلة', 'Qibla direction'), Icons.explore_outlined, openQibla, sage),
++      (tr('المسابقة اليومية', 'Daily quiz'), Icons.emoji_events_outlined, () { mutate(() => page = 2); loadQuiz(); }, warm),
++      (tr('ورد اليوم', 'Daily reading'), Icons.auto_stories_outlined, openDaily, bronze),
++    ];
++    return LayoutBuilder(builder: (context, constraints) {
++      final spacing = 10.0;
++      final tileWidth = (constraints.maxWidth - spacing * 2) / 3;
++      return Wrap(
++        spacing: spacing,
++        runSpacing: 10,
++        children: [
++          for (final item in items)
++            SizedBox(width: tileWidth, child: _journeyAction(item.$1, item.$2, item.$3, item.$4)),
++        ],
++      );
++    });
++  }
++
++  Widget _madinahHero() => ClipRRect(
++    borderRadius: BorderRadius.circular(27),
++    child: SizedBox(
++      height: 228,
++      width: double.infinity,
++      child: Stack(fit: StackFit.expand, children: [
++        Image.asset('assets/madinah_hero.jpg', fit: BoxFit.cover,
++          errorBuilder: (context, error, stack) => const ColoredBox(color: rawdaGreen,
++            child: CustomPaint(painter: MosqueArt())),
++        ),
++        const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(
++          begin: Alignment.topCenter,
++          end: Alignment.bottomCenter,
++          stops: [0.0, .45, 1.0],
++          colors: [Color(0x220A2D25), Color(0x300A2D25), Color(0xD90B2D26)],
++        ))),
++        PositionedDirectional(
++          top: 16, start: 16,
++          child: DecoratedBox(
++            decoration: BoxDecoration(color: const Color(0xF2FFF9E9), borderRadius: BorderRadius.circular(22)),
++            child: const Padding(
++              padding: EdgeInsets.symmetric(horizontal: 13, vertical: 6),
++              child: Row(mainAxisSize: MainAxisSize.min, children: [
++                Icon(Icons.auto_awesome, size: 14, color: rawdaGreen),
++                SizedBox(width: 6),
++                Text('الروضة', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: rawdaGreen)),
++              ]),
++            ),
++          ),
++        ),
++        PositionedDirectional(
++          start: 19, end: 19, bottom: 17,
++          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
++            Text(tr('في رحاب المدينة المنورة', 'In the city of Madinah'),
++              style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
++            const SizedBox(height: 4),
++            Text(tr('رحلتك اليومية إلى السكينة والطمأنينة', 'Your daily journey to serenity'),
++              style: const TextStyle(color: Color(0xFFFFF0CE), fontSize: 11)),
++          ]),
++        ),
++      ]),
++    ),
++  );
++
++  Widget _nextPrayerCard() {
++    final next = upcoming.isEmpty ? null : upcoming.first;
++    final left = next == null ? Duration.zero : (next['at'] as DateTime).difference(now);
++    final remaining = left.isNegative ? Duration.zero : left;
++    final countdown = '${remaining.inHours.toString().padLeft(2,'0')}:${(remaining.inMinutes % 60).toString().padLeft(2,'0')}:${(remaining.inSeconds % 60).toString().padLeft(2,'0')}';
++    final city = prefs.getString('prayer_location_label') ?? tr('اضبط موقع الصلاة', 'Set prayer location');
++    final isCairo = prayerClockZone(config, calendar) == 'Africa/Cairo';
++    final dst = isCairo
++        ? (now.timeZoneOffset == const Duration(hours: 3)
++            ? tr('التوقيت الصيفي', 'Summer time') : tr('التوقيت الشتوي', 'Winter time'))
++        : '';
++    return Container(
++      decoration: BoxDecoration(
++        borderRadius: BorderRadius.circular(25),
++        gradient: const LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft,
++          colors: [Color(0xFF245745), Color(0xFF143B32), Color(0xFF0B2C26)]),
++        boxShadow: [BoxShadow(color: rawdaGreen.withValues(alpha: .19), blurRadius: 16, offset: const Offset(0, 7))],
++      ),
++      padding: const EdgeInsets.fromLTRB(19, 17, 19, 17),
++      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
++        Row(children: [
++          const Icon(Icons.location_on_outlined, size: 15, color: rawdaGold),
++          const SizedBox(width: 5),
++          Expanded(child: Text(city, overflow: TextOverflow.ellipsis,
++              style: const TextStyle(color: Color(0xFFEEE4D2), fontSize: 11))),
++          const SizedBox(width: 6),
++          Text('${now.hour.toString().padLeft(2,'0')}:${now.minute.toString().padLeft(2,'0')}',
++              style: const TextStyle(fontFamily: 'RawdaLatin', color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
++        ]),
++        const SizedBox(height: 15),
++        Row(children: [
++          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
++            Text(tr('الصلاة القادمة', 'Next prayer'),
++                style: const TextStyle(fontSize: 12, color: Color(0xFFE5D1AB))),
++            const SizedBox(height: 2),
++            Text(next == null ? tr('أهلًا بك في الروضة', 'Welcome to Rawda') :
++                (ar ? prayerArabic[next['index'] as int] : prayerKeys[next['index'] as int]),
++                style: const TextStyle(color: Colors.white, fontSize: 27, fontWeight: FontWeight.w800)),
++          ])),
++          Container(
++            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
++            decoration: BoxDecoration(color: Colors.white.withValues(alpha: .09), borderRadius: BorderRadius.circular(15)),
++            child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
++              Text(next == null ? '--:--' : timeLabel('${next['raw']}'),
++                  style: const TextStyle(color: Colors.white, fontSize: 19, fontFamily: 'RawdaLatin', fontWeight: FontWeight.bold)),
++              Text(tr('موعد الأذان', 'Adhan time'), style: const TextStyle(color: Color(0xFFDDD0B4), fontSize: 9)),
++            ]),
++          ),
++        ]),
++        const SizedBox(height: 15),
++        Divider(color: Colors.white.withValues(alpha: .18), height: 1),
++        const SizedBox(height: 12),
++        Row(children: [
++          const Icon(Icons.hourglass_bottom_rounded, color: rawdaGold, size: 17),
++          const SizedBox(width: 7),
++          Expanded(child: Text(tr('الوقت المتبقي للأذان', 'Time until adhan'),
++            style: const TextStyle(color: Color(0xFFF2E8D7), fontSize: 11))),
++          Text(next == null ? '--:--:--' : countdown, textDirection: TextDirection.ltr,
++            style: const TextStyle(color: Color(0xFFEAC889), fontFamily: 'RawdaLatin', fontWeight: FontWeight.w800, fontSize: 17)),
++        ]),
++        if (isCairo) ...[
++          const SizedBox(height: 6),
++          Text(tr('مصر • $dst', 'Egypt • $dst'),
++            style: const TextStyle(color: Color(0xFFC1CFBF), fontSize: 10)),
++        ],
++        if (next == null) ...[
++          const SizedBox(height: 8),
++          TextButton.icon(onPressed: prayerSettings,
++            icon: const Icon(Icons.pin_drop_outlined, color: rawdaGold, size: 16),
++            label: Text(tr('تحديد الموقع لعرض المواقيت', 'Choose location to load times'),
++              style: const TextStyle(color: Colors.white))),
++        ],
++      ]),
++    );
++  }
++
++  Widget nusukHome() {
++    final name = '${account['profile']?['display_name'] ?? tr('صديق الروضة', 'Rawda friend')}';
++    final row = today;
++    final next = upcoming.isEmpty ? null : upcoming.first;
++    return ListView(
++      padding: const EdgeInsets.fromLTRB(17, 13, 17, 25),
++      children: [
++        if (prayerConfigChanged)
++          inlineStatus(tr('المواقيت المعروضة محفوظة قبل تغيير الإعدادات؛ حدّثها لتطبيق موقعك الجديد.',
++              'Prayer times were saved before your location changed; refresh them.'), () => run(fetchTimes)),
++        Padding(
++          padding: const EdgeInsets.only(bottom: 13),
++          child: Row(children: [
++            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
++              Text(tr('السلام عليكم، $name', 'Peace be with you, $name'),
++                maxLines: 1, overflow: TextOverflow.ellipsis,
++                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
++              const SizedBox(height: 3),
++              Text(tr('يوم جديد، وقرب جديد من الله', 'A new day, a fresh beginning'),
++                style: TextStyle(fontSize: 11, color: Theme.of(nav.currentContext!).colorScheme.onSurfaceVariant)),
++            ])),
++            IconButton.filledTonal(onPressed: openPrayerMonth,
++              tooltip: tr('تقويم الصلاة', 'Prayer calendar'),
++              icon: const Icon(Icons.calendar_month_outlined, size: 22)),
++          ]),
++        ),
++        _madinahHero(),
++        const SizedBox(height: 14),
++        _nextPrayerCard(),
++        _journeyHeading(tr('خدماتك اليومية', 'Daily essentials'),
++            tr('كل عباداتك في مكان واحد', 'Everything for your daily worship')),
++        journeyQuickActions(),
++        const SizedBox(height: 16),
++        Material(
++          color: dark ? const Color(0xFF203D33) : const Color(0xFFF0E8D6),
++          borderRadius: BorderRadius.circular(21),
++          child: InkWell(
++            onTap: openQuran,
++            borderRadius: BorderRadius.circular(21),
++            child: Padding(
++              padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 16),
++              child: Row(children: [
++                Container(padding: const EdgeInsets.all(12),
++                  decoration: BoxDecoration(color: rawdaGreen.withValues(alpha: .09), borderRadius: BorderRadius.circular(15)),
++                  child: const Icon(Icons.auto_stories_rounded, color: rawdaGold, size: 29)),
++                const SizedBox(width: 12),
++                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
++                  Text(tr('أكمل وردك من القرآن', 'Continue your Quran reading'),
++                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
++                  const SizedBox(height: 3),
++                  Text(tr('ارجع لآخر سورة قرأتها', 'Pick up where you left off'),
++                    style: const TextStyle(fontSize: 11)),
++                ])),
++                const Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: rawdaGold),
++              ]),
++            ),
++          ),
++        ),
++        _journeyHeading(tr('مواقيت اليوم', 'Today’s prayers'),
++            tr('تابع الفروض والتنبيهات', 'Prayer schedule and alerts'), onMore: openPrayerMonth),
++        if (row == null)
++          Text(tr('حدّد موقعك وحمّل مواقيت الصلاة من الإعدادات.',
++              'Choose your location to load prayer times.'), style: const TextStyle(fontSize: 12)),
++        for (var i = 0; i < 5; i++) prayerRow(i, row, next?['index'] == i),
++        const SizedBox(height: 15),
++        Material(
++          borderRadius: BorderRadius.circular(23),
++          color: dark ? const Color(0xFF244136) : const Color(0xFFE2EBE1),
++          child: InkWell(
++            borderRadius: BorderRadius.circular(23),
++            onTap: () { mutate(() => page = 2); loadQuiz(); },
++            child: Padding(
++              padding: const EdgeInsets.all(19),
++              child: Row(children: [
++                const Icon(Icons.emoji_events_outlined, color: rawdaGold, size: 35),
++                const SizedBox(width: 13),
++                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
++                  Text(tr('مسابقة الروضة اليومية', 'Daily Rawda quiz'),
++                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
++                  Text(tr('٥ أسئلة جديدة • نقطتان لكل إجابة صحيحة',
++                      '5 questions • 2 points per correct answer'),
++                    style: const TextStyle(fontSize: 11)),
++                ])),
++                const Icon(Icons.chevron_left_rounded, color: rawdaGreen),
++              ]),
++            ),
++          ),
++        ),
++        for (final message in announcements)
++          Card(child: ListTile(
++            leading: const Icon(Icons.campaign_outlined, color: rawdaGold),
++            title: Text('${message['title']}'),
++            subtitle: Text('${message['body']}'),
++          )),
++        const SizedBox(height: 14),
++        Center(child: Text(tr('الروضة • رفيقك كل يوم', 'Rawda • your daily companion'),
++          style: const TextStyle(color: rawdaGold, fontSize: 10))),
++      ],
++    );
++  }
++}
+diff --git a/rawda/lib/premium.dart b/rawda/lib/premium.dart
+index b65ee09..8d8a8fe 100644
+--- a/rawda/lib/premium.dart
++++ b/rawda/lib/premium.dart
+@@ -229,72 +229,7 @@ extension PremiumRawda on RawdaState {
+     ),
+   );
+ 
+-  Widget featureGrid() {
+-    final items = <(String, IconData, VoidCallback)>[
+-      (tr('القرآن الكريم', 'Quran'), Icons.menu_book_rounded, openQuran),
+-      (tr('القبلة', 'Qibla'), Icons.explore_outlined, openQibla),
+-      (tr('المسبحة', 'Tasbih'), Icons.touch_app_outlined, openTasbih),
+-      (
+-        tr('أذكار الصباح', 'Morning adhkar'),
+-        Icons.wb_sunny_outlined,
+-        () => openAdhkar('morning'),
+-      ),
+-      (
+-        tr('أذكار المساء', 'Evening adhkar'),
+-        Icons.bedtime_outlined,
+-        () => openAdhkar('evening'),
+-      ),
+-      (
+-        tr('ورد اليوم', 'Daily reading'),
+-        Icons.auto_stories_outlined,
+-        openDaily,
+-      ),
+-    ];
+-    return LayoutBuilder(
+-      builder: (context, c) => Wrap(
+-        spacing: 10,
+-        runSpacing: 10,
+-        children: [
+-          for (final item in items)
+-            SizedBox(
+-              width: (c.maxWidth - 20) / 3,
+-              child: Material(
+-                color: dark ? const Color(0xFF20362B) : const Color(0xFFFFFEF9),
+-                borderRadius: BorderRadius.circular(22),
+-                child: InkWell(
+-                  borderRadius: BorderRadius.circular(22),
+-                  onTap: item.$3,
+-                  child: Padding(
+-                    padding: const EdgeInsets.symmetric(
+-                      vertical: 18,
+-                      horizontal: 4,
+-                    ),
+-                    child: Column(
+-                      children: [
+-                        Icon(
+-                          item.$2,
+-                          size: 27,
+-                          color: dark ? rawdaGold : rawdaGreen,
+-                        ),
+-                        const SizedBox(height: 9),
+-                        Text(
+-                          item.$1,
+-                          textAlign: TextAlign.center,
+-                          style: const TextStyle(
+-                            fontSize: 11,
+-                            fontWeight: FontWeight.w600,
+-                          ),
+-                        ),
+-                      ],
+-                    ),
+-                  ),
+-                ),
+-              ),
+-            ),
+-        ],
+-      ),
+-    );
+-  }
++  Widget featureGrid() => journeyQuickActions();
+ 
+   Widget premiumHome() {
+     final next = upcoming.isEmpty ? null : upcoming.first;
+@@ -1338,9 +1273,16 @@ extension _PremiumAuth on _AuthScreenState {
+                   ),
+                   child: Stack(
+                     children: [
+-                      const Positioned.fill(
+-                        child: CustomPaint(painter: MosqueArt()),
++                      Positioned.fill(
++                        child: Image.asset('assets/madinah_hero.jpg', fit: BoxFit.cover),
+                       ),
++                      const Positioned.fill(child: DecoratedBox(
++                        decoration: BoxDecoration(gradient: LinearGradient(
++                          begin: Alignment.topCenter,
++                          end: Alignment.bottomCenter,
++                          colors: [Color(0xC9123930), Color(0xE60B2B25)],
++                        )),
++                      )),
+                       Padding(
+                         padding: const EdgeInsets.symmetric(
+                           horizontal: 24,
+diff --git a/rawda/pubspec.yaml b/rawda/pubspec.yaml
+index 1ff3dba..a4b16d9 100644
+--- a/rawda/pubspec.yaml
++++ b/rawda/pubspec.yaml
+@@ -1,7 +1,7 @@
+ name: rawda
+ description: Rawda prayer and Quran companion
+ publish_to: none
+-version: 1.4.3+17
++version: 1.4.4+18
+ environment:
+   sdk: '>=3.8.0 <4.0.0'
+ dependencies:
+diff --git a/rawda/test/app_test.dart b/rawda/test/app_test.dart
+index f383521..9df9a6f 100644
+--- a/rawda/test/app_test.dart
++++ b/rawda/test/app_test.dart
+@@ -312,6 +312,8 @@ void main() {
+       final a = await boot(t);
+       await t.pumpAndSettle();
+       expect(find.text('أهلًا بك في الروضة'), findsOneWidget);
++      expect(find.text('في رحاب المدينة المنورة'), findsOneWidget);
++      expect(find.text('الصلاة القادمة'), findsOneWidget);
+       expect(a.account['profile']['display_name'], 'يوسف');
+       await screenshot(t, 'home');
+       a.push('تدريب', (_) => PracticeScreen(app: a));

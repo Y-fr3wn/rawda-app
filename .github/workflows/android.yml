@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: rawda-1-4-3-${{ github.ref }}
+  group: rawda-1-4-4-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   android:
@@ -18,13 +18,17 @@ jobs:
       HAS_RELEASE_KEY: ${{ secrets.RAWDA_KEYSTORE_BASE64 != '' && secrets.RAWDA_KEYSTORE_PASSWORD != '' }}
     steps:
       - uses: actions/checkout@v4
-      - name: Restore original Rawda 1.4.3 Flutter project
+      - name: Restore Rawda base and apply 1.4.4 visual redesign
         shell: bash
         run: |
           set -euo pipefail
           cat source-parts/part-*.b64 | base64 --decode > /tmp/rawda-source.zip
           echo 'ee84f3153a14e9dfe871e8dd206f130907c04046aea79c37b2b45bebb31120e4  /tmp/rawda-source.zip' | sha256sum --check
           unzip -q /tmp/rawda-source.zip
+          git apply --check overrides/visual-redesign.patch
+          git apply overrides/visual-redesign.patch
+          base64 --decode overrides/madinah_hero.b64 > rawda/assets/madinah_hero.jpg
+          echo '2b1c1939dd62182301c667c4c516b759ff86849b1fcefaafaec6c408f1d71d86  rawda/assets/madinah_hero.jpg' | sha256sum --check
           cp rawda/android/app/src/main/res/raw/adhan.ogg rawda/assets/adhan.ogg
           cp rawda/android/app/src/main/res/raw/iqama.ogg rawda/assets/iqama.ogg
           test -f rawda/lib/main.dart
@@ -104,7 +108,7 @@ jobs:
         if: env.HAS_RELEASE_KEY == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: Rawda-1.4.3-SIGNED-APK
+          name: Rawda-1.4.4-SIGNED-APK
           path: rawda/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 14
@@ -112,9 +116,17 @@ jobs:
         if: env.HAS_RELEASE_KEY == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: Rawda-1.4.3-SIGNED-AAB
+          name: Rawda-1.4.4-SIGNED-AAB
           path: rawda/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
+          retention-days: 14
+      - name: Upload visual test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Rawda-1.4.4-UI-Screenshots
+          path: rawda/test-results/*.png
+          if-no-files-found: warn
           retention-days: 14
       - name: Remove private signing key
         if: always()
