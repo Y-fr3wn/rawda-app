@@ -261,8 +261,13 @@ extension NusukInspiredRawda on RawdaState {
             height: 350,
             child: Stack(
               children: [
-                const Positioned.fill(
-                  child: CustomPaint(painter: RawdaMedinaPainter()),
+                Positioned.fill(
+                  child: Image.asset(
+                    'assets/madinah_hero.jpg',
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        const CustomPaint(painter: RawdaMedinaPainter()),
+                  ),
                 ),
                 Positioned.fill(
                   child: DecoratedBox(
@@ -271,8 +276,8 @@ extension NusukInspiredRawda on RawdaState {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          const Color(0xFF0F3029).withValues(alpha: .05),
-                          const Color(0xFF092C24).withValues(alpha: .32),
+                          const Color(0xFF0F3029).withValues(alpha: .32),
+                          const Color(0xFF092C24).withValues(alpha: .78),
                         ],
                       ),
                     ),

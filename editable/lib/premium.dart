@@ -1338,8 +1338,24 @@ extension _PremiumAuth on _AuthScreenState {
                   ),
                   child: Stack(
                     children: [
+                      Positioned.fill(
+                        child: Image.asset(
+                          'assets/madinah_hero.jpg',
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              const CustomPaint(painter: MosqueArt()),
+                        ),
+                      ),
                       const Positioned.fill(
-                        child: CustomPaint(painter: MosqueArt()),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xA9123930), Color(0xE60B2B25)],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                            ),
+                          ),
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(
