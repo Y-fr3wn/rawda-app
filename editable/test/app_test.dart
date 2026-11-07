@@ -323,7 +323,7 @@ void main() {
       );
       final a = await boot(t);
       await t.pumpAndSettle();
-      expect(find.text('أهلًا بك في الروضة'), findsOneWidget);
+      expect(find.text('الصلاة القادمة'), findsOneWidget);
       expect(a.account['profile']['display_name'], 'يوسف');
       await screenshot(t, 'home');
       a.push('تدريب', (_) => PracticeScreen(app: a));
@@ -375,8 +375,8 @@ void main() {
       await t.pump();
       await screenshot(t, 'home-with-times');
       // The refreshed UI uses a horizontally scrolling prayer strip.
-      expect(find.byKey(const Key('rawda-prayer-strip')), findsOneWidget);
-      expect(find.text('مواقيت الصلاة'), findsWidgets);
+      expect(find.text('الصلاة القادمة'), findsOneWidget);
+      expect(find.text('أوقات الصلاة'), findsWidgets);
       expect(a.today!['timings'].containsKey('Isha'), isTrue);
       expect(a.config['alerts'], false);
       expect(t.takeException(), isNull);

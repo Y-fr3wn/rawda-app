@@ -3386,6 +3386,9 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
             refreshReader = () => update(() {});
             return Column(
               children: [
+                referenceReaderTitle(ar
+                  ? "سورة ${chapter['name_arabic']}"
+                  : "Surah ${chapter['name_simple']}"),
                 Row(
                   children: [
                     IconButton(
@@ -4231,6 +4234,8 @@ class _AdhkarScreenState extends State<AdhkarScreen> {
   Widget build(BuildContext context) {
     final a = widget.app;
     return a.wrapList([
+      a.referenceAdhkarHeader(widget.type),
+      const SizedBox(height: 8),
       a.notice(
         a.tr(
           'مجموعة مختارة من الأذكار مع مصادرها. اضغط العداد لكل تكرار.',

@@ -1257,76 +1257,7 @@ extension _PremiumAuth on _AuthScreenState {
             child: ListView(
               padding: const EdgeInsets.all(24),
               children: [
-                Container(
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    color: rawdaGreen,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: Image.asset(
-                          'assets/madinah_hero.jpg',
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              const CustomPaint(painter: MosqueArt()),
-                        ),
-                      ),
-                      const Positioned.fill(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Color(0xA9123930), Color(0xE60B2B25)],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 27,
-                        ),
-                        child: Column(
-                          children: [
-                            Center(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(22),
-                                child: Image.asset(
-                                  'assets/logo.png',
-                                  width: 82,
-                                  height: 82,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 13),
-                            Text(
-                              a.tr('الروضة', 'Rawda'),
-                              style: const TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFFE5D1A1),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              a.tr(
-                                'رفيق يومك إلى الطمأنينة',
-                                'Your daily companion to peace',
-                              ),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.white70,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                RawdaReferenceLoginBanner(arabic: a.ar),
                 const SizedBox(height: 27),
                 Text(
                   signup

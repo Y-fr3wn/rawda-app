@@ -3,7 +3,6 @@ part of 'main.dart';
 /// A screen-level composition based on Rawda's approved reference mockups.
 /// Text, accounts, times and buttons remain real Flutter controls, not a
 /// flattened screenshot of the reference.
-const _v2Cream = Color(0xFFFFF7E9);
 const _v2Paper = Color(0xFFFFF9EF);
 const _v2Emerald = Color(0xFF064631);
 const _v2Gold = Color(0xFFD8AD64);
@@ -125,10 +124,7 @@ extension RawdaReferenceFidelity on RawdaState {
       child: SizedBox(
         height: height,
         child: Stack(fit: StackFit.expand, children: [
-          Image.asset('assets/madinah_hero.jpg',
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) =>
-              const CustomPaint(painter: RawdaMedinaPainter())),
+          const CustomPaint(painter: RawdaPaintedMosqueScene()),
           const DecoratedBox(decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -594,6 +590,65 @@ extension RawdaReferenceFidelity on RawdaState {
     );
   }
 
+  Widget referenceReaderTitle(String surahName) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
+      child: framedCard(
+        padding: const EdgeInsets.fromLTRB(25, 17, 25, 18),
+        child: Column(children: [
+          const Icon(Icons.auto_stories_rounded,
+            color: _v2Gold, size: 27),
+          const SizedBox(height: 4),
+          Text(surahName,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'RawdaArabic', fontSize: 22,
+              fontWeight: FontWeight.w900,
+              color: dark ? const Color(0xFFFFE1AA)
+                : _v2Emerald,
+            )),
+          const SizedBox(height: 4),
+          Container(width: 66, height: 2,
+            color: _v2Gold),
+        ]),
+      ),
+    );
+  }
+
+  Widget referenceAdhkarHeader(String type) {
+    final title = switch (type) {
+      'morning' => tr('أذكار الصباح', 'Morning adhkar'),
+      'evening' => tr('أذكار المساء', 'Evening adhkar'),
+      'sleep' => tr('أذكار النوم', 'Bedtime adhkar'),
+      _ => tr('أذكار بعد الصلاة', 'After-prayer adhkar'),
+    };
+    final symbol = switch (type) {
+      'morning' => Icons.wb_sunny_rounded,
+      'evening' => Icons.nights_stay_rounded,
+      'sleep' => Icons.bedtime_rounded,
+      _ => Icons.mosque_rounded,
+    };
+    return framedCard(
+      padding: const EdgeInsets.fromLTRB(22, 20, 22, 20),
+      child: Row(children: [
+        Icon(symbol, size: 37,
+          color: dark ? _v2Gold : _v2Emerald),
+        const SizedBox(width: 16),
+        Expanded(child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: const TextStyle(
+              fontSize: 19, fontWeight: FontWeight.w900)),
+            const SizedBox(height: 6),
+            Text(tr('اذكر الله في كل وقت',
+                'Remember Allah throughout your day'),
+                style: const TextStyle(fontSize: 12)),
+          ],
+        )),
+      ]),
+    );
+  }
+
   Widget referencePrayerToday() {
     final current = today;
     final next = upcoming.isEmpty ? null : upcoming.first;
@@ -675,6 +730,223 @@ extension RawdaReferenceFidelity on RawdaState {
             label: Text(tr('مواقيت الشهر', 'Monthly timetable'))),
         ],
       ),
+    );
+  }
+}
+
+
+/// Lightweight vector illustration matching the reference's twilight
+/// mosque, minarets, domes and lake, with no network or bitmap loading.
+class RawdaPaintedMosqueScene extends CustomPainter {
+  const RawdaPaintedMosqueScene();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final bounds = Offset.zero & size;
+    canvas.drawRect(bounds, Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter, end: Alignment.bottomCenter,
+        colors: [
+          Color(0xFF0B2A39),
+          Color(0xFF174858),
+          Color(0xFF9E8668),
+          Color(0xFFF7CB8C),
+          Color(0xFF2E746B),
+        ],
+        stops: [0, .32, .55, .75, 1],
+      ).createShader(bounds));
+
+    // Moon above the skyline.
+    final moonAt = Offset(w * .80, h * .18);
+    canvas.drawCircle(moonAt, h * .043,
+      Paint()..color = const Color(0xFFFFF1C2));
+    canvas.drawCircle(moonAt + Offset(h * .023, -h * .017),
+      h * .041, Paint()..color = const Color(0xFF123C4D));
+    for (final point in [
+      Offset(.10 * w, .13 * h), Offset(.23 * w, .24 * h),
+      Offset(.66 * w, .12 * h), Offset(.92 * w, .29 * h),
+    ]) {
+      canvas.drawCircle(point, 1.3,
+        Paint()..color = const Color(0xFFFFE9B3));
+    }
+
+    final horizon = h * .74;
+    final hill = Paint()..color = const Color(0xFF205C53);
+    canvas.drawPath(Path()
+      ..moveTo(0, horizon)
+      ..quadraticBezierTo(w * .2, h * .54, w * .43, h * .73)
+      ..quadraticBezierTo(w * .76, h * .53, w, horizon)
+      ..lineTo(w, h)
+      ..lineTo(0, h)..close(), hill);
+    canvas.drawRect(Rect.fromLTWH(0, horizon, w, h - horizon),
+      Paint()..shader = const LinearGradient(
+        begin: Alignment.topCenter, end: Alignment.bottomCenter,
+        colors: [Color(0xFF367C73), Color(0xFF104F54)],
+      ).createShader(Rect.fromLTWH(0, horizon, w, h - horizon)));
+
+    // Warm mosque body and repeating gold archways.
+    final bottom = h * .82;
+    final bodyTop = h * .52;
+    final mosque = Rect.fromLTRB(w * .22, bodyTop, w * .78, bottom);
+    canvas.drawRect(mosque,
+      Paint()..shader = const LinearGradient(
+        colors: [Color(0xFFEAD4AA), Color(0xFFD0B486),
+          Color(0xFF9B7950)],
+      ).createShader(mosque));
+    canvas.drawRect(Rect.fromLTRB(w * .20, bodyTop - 4, w * .8, bodyTop + 5),
+      Paint()..color = const Color(0xFFF8D48A));
+    final arches = Paint()
+      ..color = const Color(0xFF1E514C)
+      ..style = PaintingStyle.fill;
+    for (var i = 0; i < 9; i++) {
+      final x = w * (.245 + i * .059);
+      final y = h * .65;
+      final width = w * .038;
+      final p = Path()
+        ..moveTo(x - width / 2, bottom)
+        ..lineTo(x - width / 2, y + h * .03)
+        ..quadraticBezierTo(x, y - h * .025,
+          x + width / 2, y + h * .03)
+        ..lineTo(x + width / 2, bottom)
+        ..close();
+      canvas.drawPath(p, arches);
+    }
+
+    void dome(double x, double y, double width, double rise,
+        {bool gold = false}) {
+      final p = Path()
+        ..moveTo(x - width / 2, y)
+        ..quadraticBezierTo(x - width * .58, y - rise * .62,
+            x, y - rise)
+        ..quadraticBezierTo(x + width * .58, y - rise * .62,
+            x + width / 2, y)
+        ..close();
+      canvas.drawPath(p, Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft, end: Alignment.bottomRight,
+          colors: gold
+            ? [const Color(0xFFFFE7A3), const Color(0xFFB28A51)]
+            : [const Color(0xFF3B9376), const Color(0xFF075042),
+               const Color(0xFF083E36)],
+        ).createShader(Rect.fromLTWH(x - width / 2,
+            y - rise, width, rise)));
+      canvas.drawLine(Offset(x, y - rise),
+        Offset(x, y - rise - h * .035),
+        Paint()..color = const Color(0xFFEDC47A)
+          ..strokeWidth = 2.2);
+      canvas.drawCircle(Offset(x, y - rise - h * .04),
+        2.7, Paint()..color = const Color(0xFFFCE2A3));
+    }
+
+    dome(w * .50, h * .55, w * .32, h * .26);
+    dome(w * .31, h * .56, w * .14, h * .14, gold: true);
+    dome(w * .69, h * .56, w * .14, h * .14, gold: true);
+
+    void minaret(double px, double heightScale) {
+      final top = h * heightScale;
+      final base = bottom - h * .02;
+      final width = w * .033;
+      final rect = Rect.fromLTRB(px - width, top + h * .04,
+          px + width, base);
+      canvas.drawRect(rect,
+        Paint()..shader = const LinearGradient(
+          colors: [Color(0xFFF5E0B5), Color(0xFFBF9C6C),
+            Color(0xFF846448)],
+        ).createShader(rect));
+      for (final ratio in [.27, .51, .76]) {
+        final y = top + (base - top) * ratio;
+        canvas.drawRect(Rect.fromLTWH(px - width * 1.6, y,
+          width * 3.2, h * .018),
+          Paint()..color = const Color(0xFFF9D78C));
+        canvas.drawRect(Rect.fromLTWH(px - width * .39,
+          y - h * .045, width * .78, h * .029),
+          Paint()..color = const Color(0xFF345D51));
+      }
+      final cap = Path()
+        ..moveTo(px - width * 1.25, top + h * .04)
+        ..lineTo(px, top - h * .022)
+        ..lineTo(px + width * 1.25, top + h * .04)
+        ..close();
+      canvas.drawPath(cap,
+        Paint()..color = const Color(0xFFE7C47C));
+      canvas.drawLine(Offset(px, top - h * .025),
+          Offset(px, top - h * .065),
+          Paint()..color = const Color(0xFFF3D396)
+          ..strokeWidth = 1.5);
+      canvas.drawCircle(Offset(px, top - h * .07), 1.7,
+        Paint()..color = const Color(0xFFFFE3A2));
+    }
+
+    minaret(w * .09, .28);
+    minaret(w * .23, .19);
+    minaret(w * .78, .19);
+    minaret(w * .92, .30);
+
+    // Gentle reflection in the lake beneath the mosque.
+    final reflection = Paint()
+      ..color = const Color(0xFFF6CF8A).withValues(alpha: .40)
+      ..strokeWidth = 1.25
+      ..strokeCap = StrokeCap.round;
+    for (var i = 0; i < 22; i++) {
+      final y = horizon + i * h * .013;
+      final spread = w * (.06 + i * .008);
+      canvas.drawLine(Offset(w * .5 - spread, y),
+          Offset(w * .5 + spread, y), reflection);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant RawdaPaintedMosqueScene oldDelegate) => false;
+}
+
+
+/// Warm parchment login top, with Islamic arches and gilded corners.
+class RawdaReferenceLoginBanner extends StatelessWidget {
+  const RawdaReferenceLoginBanner({super.key, required this.arabic});
+  final bool arabic;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 199,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF5DD), Color(0xFFFFFBF1)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: _v2Gold, width: 1.1),
+      ),
+      child: Stack(children: [
+        const Positioned.fill(
+          child: CustomPaint(painter: RawdaGoldCorners())),
+        Align(
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            width: 220, height: 170,
+            child: CustomPaint(painter: RawdaArchEmblem()),
+          ),
+        ),
+        Center(child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.mosque_rounded,
+              color: _v2Gold, size: 33),
+            Text(arabic ? 'الروضة' : 'Rawda',
+              style: const TextStyle(
+                color: _v2Emerald, fontSize: 34,
+                fontWeight: FontWeight.w900)),
+            const SizedBox(height: 4),
+            Text(arabic ? 'مرحبًا بك في الروضة' :
+                'Welcome to Rawda',
+              style: const TextStyle(
+                color: _v2Emerald, fontSize: 14,
+                fontWeight: FontWeight.w700)),
+          ],
+        )),
+      ]),
     );
   }
 }
