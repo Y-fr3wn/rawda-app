@@ -87,7 +87,7 @@ extension RefinedRawdaSettings on RawdaState {
         ClipRRect(
           borderRadius: BorderRadius.circular(26),
           child: SizedBox(
-            height: 174,
+            height: 104,
             child: Stack(
               children: [
                 const Positioned.fill(child:
@@ -109,23 +109,15 @@ extension RefinedRawdaSettings on RawdaState {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.auto_awesome_rounded,
-                          color: Color(0xFFEBD4A5), size: 31),
+                      const Icon(Icons.tune_rounded,
+                          color: Color(0xFFEBD4A5), size: 22),
                       const SizedBox(height: 7),
                       Text(tr('الروضة على ذوقك', 'Make Rawda yours'),
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 21, fontWeight: FontWeight.w800,
+                            fontSize: 16, fontWeight: FontWeight.w800,
                           )),
-                      const SizedBox(height: 7),
-                      Text(
-                        tr('كل تفاصيل يومك في تجربة هادئة وأنيقة',
-                           'A calm and beautiful experience every day'),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Color(0xFFF4E1C0), fontSize: 12,
-                        ),
-                      ),
+                      const SizedBox(height: 2),
                     ],
                   ),
                 ),

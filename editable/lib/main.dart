@@ -23,6 +23,7 @@ part 'admin.dart';
 part 'nusuk_ui.dart';
 part 'refined_settings.dart';
 part 'visual_kit.dart';
+part 'visual_fidelity.dart';
 
 const bridge = MethodChannel('com.rawda/native');
 const sensors = EventChannel('com.rawda/compass');
@@ -1347,8 +1348,8 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
         fontFamily: ar ? 'RawdaArabic' : 'RawdaLatin',
         fontFamilyFallback: const ['RawdaArabic', 'RawdaLatin'],
         scaffoldBackgroundColor: dark
-            ? const Color(0xFF161D18)
-            : const Color(0xFFF7F4EC),
+            ? const Color(0xFF131F1A)
+            : const Color(0xFFFFF7E9),
         appBarTheme: AppBarTheme(
           backgroundColor: dark ? const Color(0xFF092D26) : rawdaGreen,
           foregroundColor: const Color(0xFFF2DBAD),
@@ -1365,13 +1366,23 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
           backgroundColor: dark
               ? const Color(0xFF14271F)
               : const Color(0xFFFFFCF4),
-          indicatorColor: rawdaGold.withValues(alpha: .22),
-          height: 74,
-          labelTextStyle: const WidgetStatePropertyAll(
-            TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+          indicatorColor: const Color(0xFF064631),
+          height: 68,
+          labelTextStyle: WidgetStateProperty.resolveWith(
+            (states) => TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              color: states.contains(WidgetState.selected)
+                  ? const Color(0xFF064631)
+                  : (dark ? const Color(0xFFF0D8AF) : rawdaGreen),
+            ),
           ),
-          iconTheme: WidgetStatePropertyAll(
-            IconThemeData(color: dark ? const Color(0xFFEBD9B7) : rawdaGreen),
+          iconTheme: WidgetStateProperty.resolveWith(
+            (states) => IconThemeData(
+              color: states.contains(WidgetState.selected)
+                ? const Color(0xFFFFE4A8)
+                : (dark ? const Color(0xFFEBD9B7) : rawdaGreen),
+            ),
           ),
         ),
         filledButtonTheme: FilledButtonThemeData(
@@ -1620,12 +1631,7 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
   }
 
   Widget quizBody() => wrapList([
-    rawdaFeatureHero(
-      tr('المسابقة اليومية', 'Daily quiz'),
-      tr('٥ أسئلة كل يوم • نقطتان لكل إجابة صحيحة',
-         'Five questions a day • two points per correct answer'),
-      Icons.emoji_events_outlined,
-    ),
+    referenceQuizBanner(),
     const SizedBox(height: 12),
     Card(
       child: Padding(

@@ -265,13 +265,22 @@ class _RawdaTasbihViewState extends State<RawdaTasbihView> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 35),
       children: [
-        app.rawdaFeatureHero(
-          app.tr('مسبحة الروضة', 'Rawda Tasbih'),
-          app.tr('اذكر الله بقلب حاضر واحتفظ بعدّادك.',
-              'Remember Allah, one bead at a time.'),
-          Icons.spa_outlined,
+        app.framedCard(
+          padding: const EdgeInsets.symmetric(
+              horizontal: 19, vertical: 12),
+          child: Row(children: [
+            const Icon(Icons.blur_circular_rounded,
+              color: Color(0xFFD8AD64), size: 28),
+            const SizedBox(width: 10),
+            Expanded(child: Text(
+              app.tr('مسبحة الروضة', 'Rawda digital Tasbih'),
+              style: const TextStyle(
+                fontSize: 17, fontWeight: FontWeight.w900))),
+            const Icon(Icons.bookmark_outline,
+              color: Color(0xFFD8AD64)),
+          ]),
         ),
-        const SizedBox(height: 13),
+        const SizedBox(height: 12),
         Card(
           clipBehavior: Clip.antiAlias,
           child: Padding(
@@ -587,108 +596,5 @@ extension RawdaPrayerToday on RawdaState {
       (context) => rawdaPrayerToday());
   }
 
-  Widget rawdaPrayerToday() {
-    final current = today;
-    final next = upcoming.isNotEmpty ? upcoming.first : null;
-    final label = prefs.getString('prayer_location_label') ??
-        tr('الموقع المحدد', 'Selected location');
-    final icons = <IconData>[
-      Icons.wb_twilight_outlined,
-      Icons.wb_sunny_outlined,
-      Icons.wb_sunny_rounded,
-      Icons.wb_twilight_rounded,
-      Icons.nightlight_round,
-    ];
-    return RefreshIndicator(
-      onRefresh: fetchTimes,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 35),
-        children: [
-          rawdaFeatureHero(tr('أوقات الصلاة', 'Prayer times'),
-              tr('صلاتك في وقتها، أينما كنت',
-                 'Keep your prayer times at hand'),
-              Icons.mosque_outlined),
-          const SizedBox(height: 14),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.location_on_outlined,
-                  color: rawdaGold),
-              title: Text(label, style: const TextStyle(
-                fontWeight: FontWeight.w800, fontSize: 14,
-              )),
-              subtitle: Text(tr(
-                'المواقيت وفق الموقع المختار والتوقيت المحلي',
-                'Local times for your selected location')),
-              trailing: IconButton(
-                tooltip: tr('الموقع والتوقيت', 'Location & time zone'),
-                onPressed: prayerSettings,
-                icon: const Icon(Icons.tune_rounded),
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          for (var i = 0; i < prayerKeys.length; i++)
-            Card(
-              clipBehavior: Clip.antiAlias,
-              child: Container(
-                color: next != null && next['index'] == i
-                    ? (dark ? const Color(0xFF1C5440) : rawdaGreen)
-                    : null,
-                child: ListTile(
-                  leading: Icon(icons[i], size: 29,
-                      color: next != null && next['index'] == i
-                        ? const Color(0xFFF2D6A0)
-                        : rawdaGold),
-                  title: Text(ar ? prayerArabic[i] : prayerKeys[i],
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: next != null && next['index'] == i
-                        ? Colors.white : null,
-                    )),
-                  subtitle: next != null && next['index'] == i
-                    ? Text(tr('الصلاة القادمة', 'Next prayer'),
-                      style: const TextStyle(
-                        color: Color(0xFFEBD4A5), fontSize: 11))
-                    : null,
-                  trailing: Text(current == null ? '--:--'
-                      : timeLabel(current['timings'][prayerKeys[i]]
-                          .toString()),
-                    textDirection: TextDirection.ltr,
-                    style: TextStyle(
-                      fontSize: 19, fontFamily: 'RawdaLatin',
-                      fontWeight: FontWeight.w800,
-                      color: next != null && next['index'] == i
-                        ? const Color(0xFFF8E6BC)
-                        : (dark ? const Color(0xFFF5DCA6) : rawdaGreen),
-                    )),
-                ),
-              ),
-            ),
-          const SizedBox(height: 18),
-          FilledButton.icon(
-            onPressed: openPrayerMonth,
-            icon: const Icon(Icons.calendar_month_outlined),
-            label: Text(tr('جدول مواقيت الشهر',
-                          'Monthly prayer timetable')),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: openPrayerNotifications,
-            icon: const Icon(Icons.notifications_active_outlined),
-            label: Text(tr('تنبيهات الأذان',
-                          'Adhan notifications')),
-          ),
-          if (current == null)
-            Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: Text(tr(
-                'لا توجد مواقيت محمّلة. حدّد موقعك أو اسحب للتحديث.',
-                'No prayer times loaded. Choose a location or pull to refresh.'),
-                textAlign: TextAlign.center,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+  Widget rawdaPrayerToday() => referencePrayerToday();
 }
