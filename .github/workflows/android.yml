@@ -67,7 +67,7 @@ jobs:
           flutter test --reporter expanded
       - name: Check native Android notification tests
         working-directory: rawda
-        run: ./android/gradlew -p android :app:testDebugUnitTest --no-daemon
+        run: bash android/gradlew -p android :app:testDebugUnitTest --no-daemon
       - name: Build Firebase debug APK
         working-directory: rawda
         run: flutter build apk --debug --no-pub --dart-define=RAWDA_USE_FIREBASE=true --dart-define=RAWDA_FIREBASE_EMAIL_RETURN=true
