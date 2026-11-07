@@ -202,22 +202,15 @@ extension NusukInspiredRawda on RawdaState {
         ? Duration.zero
         : (next['at'] as DateTime).difference(now);
     final safe = remaining.isNegative ? Duration.zero : remaining;
-    final countdown = safe.inHours.toString().padLeft(2, '0') +
-        ':' +
-        (safe.inMinutes % 60).toString().padLeft(2, '0') +
-        ':' +
-        (safe.inSeconds % 60).toString().padLeft(2, '0');
+    final countdown =
+        "${safe.inHours.toString().padLeft(2, '0')}:${(safe.inMinutes % 60).toString().padLeft(2, '0')}:${(safe.inSeconds % 60).toString().padLeft(2, '0')}";
     final displayName = (account['profile']?['display_name'] ??
             tr('صديق الروضة', 'Rawda friend'))
         .toString();
     final current = today;
     final hijri = current == null
         ? dayKey(now)
-        : current['date']['hijri']['day'].toString() +
-            ' ' +
-            current['date']['hijri']['month'][ar ? 'ar' : 'en'].toString() +
-            ' ' +
-            current['date']['hijri']['year'].toString();
+        : "${current['date']['hijri']['day']} ${current['date']['hijri']['month'][ar ? 'ar' : 'en']} ${current['date']['hijri']['year']}";
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 12, 18, 32),
@@ -332,8 +325,7 @@ extension NusukInspiredRawda on RawdaState {
                         next == null
                             ? tr('حدّد موقعك لعرض المواقيت',
                                 'Choose your location to see prayer times')
-                            : tr('الأذان الساعة ', 'Adhan at ') +
-                                timeLabel(next['raw'].toString()),
+                            : "${tr('الأذان الساعة ', 'Adhan at ')}${timeLabel(next['raw'].toString())}",
                         style: const TextStyle(
                             color: Color(0xFFEAD5AC),
                             fontSize: 13,
@@ -474,11 +466,7 @@ extension NusukInspiredRawda on RawdaState {
               leading: const Icon(Icons.timelapse, color: rawdaGold),
               title: Text(tr('تذكير الإقامة', 'Iqama reminder')),
               subtitle: Text(
-                activeIqama!['minutes'].toString() +
-                    ':' +
-                    (activeIqama!['seconds'] as int)
-                        .toString()
-                        .padLeft(2, '0'),
+                "${activeIqama!['minutes']}:${(activeIqama!['seconds'] as int).toString().padLeft(2, '0')}",
               ),
             ),
           ),
@@ -535,11 +523,9 @@ extension NusukInspiredRawda on RawdaState {
                 child: Text(chapter['id'].toString()),
               ),
               title: Text(ar
-                  ? 'سورة ' + chapter['name_arabic'].toString()
-                  : 'Surah ' + chapter['name_simple'].toString()),
-              subtitle: Text(chapter['verses_count'].toString() +
-                  ' ' +
-                  tr('آية', 'verses')),
+                  ? "سورة ${chapter['name_arabic']}"
+                  : "Surah ${chapter['name_simple']}"),
+              subtitle: Text("${chapter['verses_count']} ${tr('آية', 'verses')}"),
               trailing: const Icon(Icons.play_circle_outline_rounded,
                   color: rawdaGold),
               onTap: () => openSurah(chapter['id'] as int),
