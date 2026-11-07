@@ -22,7 +22,9 @@ jobs:
           echo 'ee84f3153a14e9dfe871e8dd206f130907c04046aea79c37b2b45bebb31120e4  /tmp/rawda-source.zip' | sha256sum --check
           unzip -q /tmp/rawda-source.zip 'rawda/lib/*' 'rawda/pubspec.yaml' 'rawda/test/app_test.dart'
           mkdir -p editable
-          cp -R rawda/lib editable/lib
+          if [ ! -d editable/lib ]; then
+            cp -R rawda/lib editable/lib
+          fi
           cp rawda/pubspec.yaml editable/pubspec.yaml
           mkdir -p editable/test
           cp rawda/test/app_test.dart editable/test/app_test.dart
