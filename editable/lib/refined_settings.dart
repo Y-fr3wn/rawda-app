@@ -80,7 +80,7 @@ extension RefinedRawdaSettings on RawdaState {
 
   Widget refinedSettingsPage(BuildContext context, StateSetter update) {
     final fontSize = ((state['quranSize'] as num?)?.toDouble() ?? 30)
-        .clamp(20.0, 48.0);
+        .clamp(20.0, 48.0).toDouble();
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 36),
       children: [
