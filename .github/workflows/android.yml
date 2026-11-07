@@ -40,7 +40,19 @@ jobs:
           channel: stable
           cache: true
       - name: Install Android SDK components
-        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.0.12077973'
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          SDKMGR="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMGR" ]; then
+            SDKMGR="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager 2>/dev/null | head -n 1 || true)"
+          fi
+          if [ -n "$SDKMGR" ] && [ -x "$SDKMGR" ]; then
+            "$SDKMGR" --install 'platforms;android-36' 'build-tools;36.0.0' 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.0.12077973'
+          else
+            echo 'SDK Manager is not installed on runner; Android Gradle plugin can download necessary components during build.'
+          fi
       - name: Check Egypt time transitions
         working-directory: rawda
         run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
