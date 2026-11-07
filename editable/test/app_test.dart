@@ -362,12 +362,10 @@ void main() {
       });
       await t.pump();
       await screenshot(t, 'home-with-times');
-      await t.scrollUntilVisible(
-        find.text('العشاء'),
-        250,
-        scrollable: find.byType(Scrollable).first,
-      );
-      expect(find.text('العشاء'), findsOneWidget);
+      // The refreshed UI uses a horizontally scrolling prayer strip.
+      expect(find.byKey(const Key('rawda-prayer-strip')), findsOneWidget);
+      expect(find.text('مواقيت الصلاة'), findsWidgets);
+      expect(a.today!['timings'].containsKey('Isha'), isTrue);
       expect(a.config['alerts'], false);
       expect(t.takeException(), isNull);
       await screenshot(t, 'prayers-disabled');
