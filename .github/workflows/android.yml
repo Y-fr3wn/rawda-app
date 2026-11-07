@@ -1,8 +1,8 @@
-name: Build Rawda 1.4.3 Android
+name: Build Rawda redesigned Android
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, feature/nusuk-inspired-ui]
 permissions:
   contents: read
 concurrency:
@@ -28,6 +28,15 @@ jobs:
           cp rawda/android/app/src/main/res/raw/adhan.ogg rawda/assets/adhan.ogg
           cp rawda/android/app/src/main/res/raw/iqama.ogg rawda/assets/iqama.ogg
           test -f rawda/lib/main.dart
+          if [ -d editable/lib ]; then
+            cp -R editable/lib/. rawda/lib/
+            rm -rf rawda/lib/lib
+            echo 'Applied redesigned Rawda Flutter UI from editable/lib.'
+          fi
+          if [ -f editable/test/app_test.dart ]; then
+            cp editable/test/app_test.dart rawda/test/app_test.dart
+            echo 'Using updated visual navigation regression test.'
+          fi
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -74,7 +83,7 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: Rawda-1.4.3-TEST-APK
+          name: Rawda-Nusuk-UI-TEST-APK
           path: rawda/build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
           retention-days: 14

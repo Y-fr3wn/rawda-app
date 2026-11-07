@@ -1,0 +1,37 @@
+name: rawda
+description: Rawda prayer and Quran companion
+publish_to: none
+version: 1.4.3+17
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  shared_preferences: 2.5.3
+  supabase_flutter: 2.8.4
+  firebase_core: 3.15.2
+  firebase_auth: 5.7.0
+  cloud_firestore: 5.6.12
+  http: 1.4.0
+  timezone: 0.10.1
+  url_launcher: 6.3.2
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 5.0.0
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+  fonts:
+    - family: RawdaArabic
+      fonts:
+        - asset: assets/NotoSansArabic.ttf
+    - family: RawdaLatin
+      fonts:
+        - asset: assets/Inter.ttf
+    - family: Quran
+      fonts:
+        - asset: assets/AmiriQuran-Regular.ttf
