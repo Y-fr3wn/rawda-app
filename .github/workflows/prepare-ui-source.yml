@@ -20,15 +20,17 @@ jobs:
           set -euo pipefail
           cat source-parts/part-*.b64 | base64 --decode > /tmp/rawda-source.zip
           echo 'ee84f3153a14e9dfe871e8dd206f130907c04046aea79c37b2b45bebb31120e4  /tmp/rawda-source.zip' | sha256sum --check
-          unzip -q /tmp/rawda-source.zip 'rawda/lib/*' 'rawda/pubspec.yaml'
+          unzip -q /tmp/rawda-source.zip 'rawda/lib/*' 'rawda/pubspec.yaml' 'rawda/test/app_test.dart'
           mkdir -p editable
           cp -R rawda/lib editable/lib
           cp rawda/pubspec.yaml editable/pubspec.yaml
+          mkdir -p editable/test
+          cp rawda/test/app_test.dart editable/test/app_test.dart
           echo "Dart source list:"
           find editable/lib -type f -name '*.dart' | sort
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add editable/lib editable/pubspec.yaml
+          git add editable/lib editable/pubspec.yaml editable/test/app_test.dart
           if ! git diff --cached --quiet; then
             git commit -m 'Extract existing Flutter UI sources for visual redesign'
             git push origin HEAD:feature/nusuk-inspired-ui
