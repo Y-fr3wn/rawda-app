@@ -20,6 +20,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 part 'premium.dart';
 part 'admin.dart';
+part 'nusuk_ui.dart';
 
 const bridge = MethodChannel('com.rawda/native');
 const sensors = EventChannel('com.rawda/compass');
@@ -142,7 +143,7 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
   late final SharedPreferences prefs = widget.prefs;
   SupabaseClient get db => Supabase.instance.client;
   bool ar = true, dark = false, ready = false, busy = false;
-  int page = 0;
+  int page = 2;
   String? problem;
   OverlayEntry? _noticeEntry;
   Timer? _noticeTimer;
@@ -275,7 +276,7 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
       account = {};
       state = {};
       quiz = [];
-      page = 0;
+      page = 2;
       isAdmin = false;
       announcements = [];
       voices = [];
@@ -371,7 +372,7 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
       now = clockNow();
       if (signed &&
           ready &&
-          page == 0 &&
+          page == 2 &&
           (nav.currentState?.canPop() != true)) {
         clockTick.value = now;
       }
@@ -1459,16 +1460,16 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
                             duration: const Duration(milliseconds: 220),
                             child: KeyedSubtree(
                               key: ValueKey(page),
-                              child: page == 0
-                                  ? ValueListenableBuilder<DateTime>(
+                              child: page == 2
+                                   ? ValueListenableBuilder<DateTime>(
                                       valueListenable: clockTick,
                                       builder: (context, tick, child) => home(),
                                     )
                                   : [
-                                      home,
-                                      worship,
+                                      nusukInspiredQuran,
                                       quizBody,
-                                      gifts,
+                                      home,
+                                      nusukInspiredToday,
                                       profile,
                                     ][page](),
                             ),
@@ -1483,15 +1484,16 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
                 selectedIndex: page,
                 onDestinationSelected: (i) {
                   setState(() => page = i);
-                  if (i == 2) loadQuiz();
+                  if (i == 1) loadQuiz();
+                  if (i == 0 && chapters.isEmpty) unawaited(loadBooks());
                 },
                 destinations: [
                   for (final item in [
-                    (Icons.home_outlined, tr('الرئيسية', 'Home')),
-                    (Icons.mosque_outlined, tr('العبادات', 'Worship')),
-                    (Icons.auto_awesome_outlined, tr('المسابقة', 'Quiz')),
-                    (Icons.card_giftcard_outlined, tr('الهدايا', 'Gifts')),
-                    (Icons.person_outline, tr('حسابي', 'Profile')),
+                    (Icons.menu_book_outlined, tr('القرآن', 'Quran')),
+                     (Icons.auto_awesome_outlined, tr('المسابقة', 'Quiz')),
+                     (Icons.home_rounded, tr('الرئيسية', 'Home')),
+                     (Icons.wb_sunny_outlined, tr('اليوم', 'Today')),
+                     (Icons.person_outline, tr('الحساب', 'Account')),
                   ])
                     NavigationDestination(icon: Icon(item.$1), label: item.$2),
                 ],
@@ -1501,7 +1503,7 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
   }
 
   Widget home() =>
-      RefreshIndicator(onRefresh: loadAccount, child: premiumHome());
+       RefreshIndicator(onRefresh: loadAccount, child: nusukInspiredHome());
 
   Widget worship() => wrapList([
     heading(tr('لحظات من الطمأنينة', 'Moments of peace')),
