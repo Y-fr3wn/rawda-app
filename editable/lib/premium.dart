@@ -903,8 +903,16 @@ extension PremiumRawda on RawdaState {
   Widget profileHeader() => Container(
     padding: const EdgeInsets.all(24),
     decoration: BoxDecoration(
-      color: rawdaGreen,
+      gradient: const LinearGradient(
+        colors: [Color(0xFF103B30), Color(0xFF1B6048)],
+        begin: Alignment.topRight, end: Alignment.bottomLeft,
+      ),
       borderRadius: BorderRadius.circular(28),
+      border: Border.all(color: rawdaGold.withValues(alpha: .48)),
+      boxShadow: [
+        BoxShadow(color: rawdaGreen.withValues(alpha: .15),
+          blurRadius: 14, offset: const Offset(0, 5)),
+      ],
     ),
     child: Column(
       children: [

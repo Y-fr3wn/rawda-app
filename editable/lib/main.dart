@@ -22,6 +22,7 @@ part 'premium.dart';
 part 'admin.dart';
 part 'nusuk_ui.dart';
 part 'refined_settings.dart';
+part 'visual_kit.dart';
 
 const bridge = MethodChannel('com.rawda/native');
 const sensors = EventChannel('com.rawda/compass');
@@ -162,6 +163,7 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
   Map<String, dynamic> account = {}, state = {}, config = {};
   List<dynamic> chapters = [], verses = [], calendar = [], quiz = [];
   String search = '';
+  String quranTabQuery = '';
   StreamSubscription<dynamic>? auth;
   RawdaFirebaseBackend? get firebase => widget.firebase;
   Timer? clock;
@@ -1348,15 +1350,15 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
             ? const Color(0xFF161D18)
             : const Color(0xFFF7F4EC),
         appBarTheme: AppBarTheme(
-          backgroundColor: dark ? const Color(0xFF162D26) : const Color(0xFFFFFBF2),
-          foregroundColor: dark ? const Color(0xFFF2DBAD) : rawdaGreen,
+          backgroundColor: dark ? const Color(0xFF092D26) : rawdaGreen,
+          foregroundColor: const Color(0xFFF2DBAD),
           centerTitle: true,
           scrolledUnderElevation: 0,
           titleTextStyle: TextStyle(
             fontFamily: ar ? 'RawdaArabic' : 'RawdaLatin',
             fontWeight: FontWeight.w800,
             fontSize: 19,
-            color: dark ? const Color(0xFFF2DBAD) : rawdaGreen,
+            color: const Color(0xFFF2DBAD),
           ),
         ),
         navigationBarTheme: NavigationBarThemeData(
@@ -1457,27 +1459,29 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
               appBar: AppBar(
                 toolbarHeight: 76,
                 title: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset('assets/logo.png', width: 40, height: 40),
-                    const SizedBox(width: 10),
-                    Text(
-                      tr('الروضة', 'Rawda'),
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
+                    Image.asset('assets/logo.png', width: 37, height: 37),
+                    const SizedBox(width: 9),
+                    Text(tr('الروضة', 'Rawda'),
+                      style: const TextStyle(
+                        color: Color(0xFFF2D49C),
+                        fontWeight: FontWeight.w800, fontSize: 23,
+                      )),
                   ],
                 ),
                 actions: [
                   IconButton(
-                    onPressed: settings,
-                    icon: const Icon(Icons.settings_outlined),
+                    tooltip: tr('تنبيهات الصلاة', 'Prayer alerts'),
+                    onPressed: openPrayerNotifications,
+                    icon: const Icon(Icons.notifications_none_rounded,
+                      color: Color(0xFFF3D8A8)),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() => ar = !ar);
-                      prefs.setBool('arabic', ar);
-                      schedule();
-                    },
-                    child: Text(ar ? 'EN' : 'عربي'),
+                  IconButton(
+                    tooltip: tr('الإعدادات', 'Settings'),
+                    onPressed: settings,
+                    icon: const Icon(Icons.settings_outlined,
+                      color: Color(0xFFF3D8A8)),
                   ),
                 ],
               ),
@@ -1525,11 +1529,7 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
               ),
               bottomNavigationBar: NavigationBar(
                 selectedIndex: page,
-                onDestinationSelected: (i) {
-                  setState(() => page = i);
-                  if (i == 1) loadQuiz();
-                  if (i == 0 && chapters.isEmpty) unawaited(loadBooks());
-                },
+                onDestinationSelected: showMainTab,
                 destinations: [
                   for (final item in [
                     (Icons.menu_book_outlined, tr('القرآن', 'Quran')),
@@ -1543,6 +1543,13 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
               ),
             ),
     );
+  }
+
+  void showMainTab(int index) {
+    if (!mounted) return;
+    setState(() => page = index);
+    if (index == 1) unawaited(loadQuiz());
+    if (index == 0 && chapters.isEmpty) unawaited(loadBooks());
   }
 
   Widget home() =>
@@ -1613,10 +1620,29 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
   }
 
   Widget quizBody() => wrapList([
-    sectionHero(
-      tr('مسابقتك اليومية', 'Your daily quiz'),
-      tr('كل يوم فرصة جديدة للمعرفة', 'A new chance to learn every day'),
-      Icons.auto_awesome_outlined,
+    rawdaFeatureHero(
+      tr('المسابقة اليومية', 'Daily quiz'),
+      tr('٥ أسئلة كل يوم • نقطتان لكل إجابة صحيحة',
+         'Five questions a day • two points per correct answer'),
+      Icons.emoji_events_outlined,
+    ),
+    const SizedBox(height: 12),
+    Card(
+      child: Padding(
+        padding: const EdgeInsets.all(15),
+        child: Row(children: [
+          const Icon(Icons.emoji_events_rounded,
+            size: 40, color: rawdaGold),
+          const SizedBox(width: 13),
+          Expanded(child: Text(tr(
+            'اختبر معلوماتك الإسلامية واجمع نقاطك ومكافآتك',
+            'Test your knowledge and earn points and rewards'),
+            style: const TextStyle(
+              fontWeight: FontWeight.w700, fontSize: 13,
+            ),
+          )),
+        ]),
+      ),
     ),
     if (quizLoading) const LinearProgressIndicator(),
     if (quizProblem != null) inlineStatus(quizProblem!, loadQuiz),
@@ -1898,6 +1924,13 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
     final bookmarks = state['bookmarks'] as List? ?? [];
     return wrapList([
       profileHeader(),
+      const SizedBox(height: 8),
+      tile(
+        tr('الإعدادات', 'Settings'),
+        Icons.settings_outlined, settings,
+        subtitle: tr('المظهر والصوت والتنبيهات والقراءة',
+          'Appearance, sound, prayer alerts and reading'),
+      ),
       tile(
         tr('تعديل بيانات الحساب', 'Edit profile details'),
         Icons.manage_accounts_outlined,
@@ -3321,9 +3354,12 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
             color:
                 state['lastSurah'] == id &&
                     state['lastAyah'] == lines[i]['ayah']
-                ? const Color(0x22536B4F)
-                : null,
-            border: const Border(bottom: BorderSide(color: Color(0x18536B4F))),
+                ? (dark ? const Color(0xFF365441)
+                    : const Color(0xFFF4E5C5))
+                : (dark ? const Color(0xFF243A2F)
+                    : const Color(0xFFFFF9ED)),
+            border: const Border(bottom: BorderSide(
+              color: Color(0x44C6A76A))),
           ),
           child: Text(
             '${separateBasmala && i == 0 ? lines[i]['text'].toString().substring(basmala.length + 1) : lines[i]['text']} ﴿${lines[i]['ayah']}﴾',
@@ -3632,64 +3668,8 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
   }
 
   void openTasbih() {
-    int count = (state['tasbih'] as num?)?.toInt() ?? 0;
-    String word = 'سبحان الله';
-    push(
-      tr('المسبحة', 'Tasbih'),
-      (context) => StatefulBuilder(
-        builder: (context, update) => wrapList([
-          DropdownButton<String>(
-            value: word,
-            isExpanded: true,
-            items: [
-              for (final s in [
-                'سبحان الله',
-                'الحمد لله',
-                'الله أكبر',
-                'لا إله إلا الله',
-                'أستغفر الله',
-              ])
-                DropdownMenuItem(value: s, child: Text(s)),
-            ],
-            onChanged: (v) => update(() => word = v!),
-          ),
-          const SizedBox(height: 35),
-          Center(
-            child: Text(
-              '$count',
-              style: const TextStyle(fontSize: 72, fontFamily: 'RawdaLatin'),
-            ),
-          ),
-          const SizedBox(height: 30),
-          SizedBox(
-            height: 150,
-            child: FilledButton(
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                update(() => count++);
-                state['tasbih'] = count;
-                prefs.setString('state:$uid', jsonEncode(state));
-              },
-              style: FilledButton.styleFrom(shape: const CircleBorder()),
-              child: Text(word, style: const TextStyle(fontSize: 24)),
-            ),
-          ),
-          const SizedBox(height: 20),
-          TextButton(
-            onPressed: () {
-              update(() => count = 0);
-              state['tasbih'] = 0;
-              saveState();
-            },
-            child: Text(tr('تصفير العداد', 'Reset counter')),
-          ),
-          TextButton(
-            onPressed: () => saveState(),
-            child: Text(tr('حفظ ومزامنة', 'Save & sync')),
-          ),
-        ]),
-      ),
-    );
+    push(tr('المسبحة', 'Tasbih'),
+      (context) => RawdaTasbihView(app: this));
   }
 
   void openCalendar() {
@@ -3739,14 +3719,14 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
       tr('عن الروضة', 'About Rawda'),
       (context) => wrapList([
         Center(child: Image.asset('assets/logo.png', width: 110)),
-        heading('الروضة • Rawda 1.3'),
+        heading('الروضة • Rawda 1.4.7'),
         Text(tr('رفيق يومك، بخطوة مطمئنة', 'A little more peace in every day')),
         heading(tr('المصادر والتراخيص', 'Sources & licenses')),
         TextButton(
           onPressed: () => showLicensePage(
             context: nav.currentContext!,
             applicationName: 'Rawda',
-            applicationVersion: '1.3',
+            applicationVersion: '1.4.7',
           ),
           child: Text(tr('عرض التراخيص', 'View licenses')),
         ),
@@ -4140,6 +4120,13 @@ class _QiblaScreenState extends State<QiblaScreen> {
           360;
     }
     return a.wrapList([
+      a.rawdaFeatureHero(
+        a.tr('اتجاه القبلة', 'Qibla direction'),
+        a.tr('بوصلة القبلة تُحدث اتجاهها من مستشعر الهاتف',
+             'Compass direction from your phone sensor'),
+        Icons.explore_outlined,
+      ),
+      const SizedBox(height: 10),
       a.notice(
         a.tr(
           'ضع الهاتف أفقيًا، بعيدًا عن المعادن، وحرّكه على شكل ٨ للمعايرة. الاتجاه يتأثر بدقة حساس هاتفك.',
@@ -4179,13 +4166,10 @@ class _QiblaScreenState extends State<QiblaScreen> {
         const SizedBox(height: 20),
         if (available && heading != null)
           Center(
-            child: Transform.rotate(
-              angle: (bearing - heading!) * math.pi / 180,
-              child: const Icon(
-                Icons.navigation,
-                size: 150,
-                color: Color(0xFFB49A60),
-              ),
+            child: RawdaCompassFace(
+              bearing: bearing,
+              heading: heading,
+              dark: a.dark,
             ),
           )
         else

@@ -167,18 +167,26 @@ extension NusukInspiredRawda on RawdaState {
 
   Widget rawdaShortcutGrid() {
     final tiles = <(String, IconData, VoidCallback, Color)>[
-      (tr('القرآن الكريم', 'Quran'), Icons.menu_book_rounded, openQuran,
-          rawdaGreen),
-      (tr('اتجاه القبلة', 'Qibla'), Icons.explore_outlined, openQibla,
-          const Color(0xFF936B42)),
-      (tr('أذكار الصباح', 'Morning adhkar'), Icons.wb_sunny_outlined,
-          () => openAdhkar('morning'), const Color(0xFFAD8551)),
-      (tr('أذكار المساء', 'Evening adhkar'), Icons.nights_stay_outlined,
-          () => openAdhkar('evening'), const Color(0xFF586D87)),
-      (tr('المسبحة', 'Tasbih'), Icons.fingerprint_outlined, openTasbih,
-          const Color(0xFF537C70)),
-      (tr('الورد اليومي', 'Daily reading'), Icons.auto_stories_outlined,
-          openDaily, const Color(0xFF95784C)),
+      (tr('أوقات الصلاة', 'Prayer times'),
+        Icons.access_time_filled_rounded, openPrayerToday,
+        const Color(0xFF97713A)),
+      (tr('القرآن الكريم', 'Holy Quran'),
+        Icons.menu_book_rounded, openQuran, rawdaGreen),
+      (tr('القبلة', 'Qibla'), Icons.explore_rounded,
+        openQibla, const Color(0xFF9B7842)),
+      (tr('الأذكار', 'Adhkar'), Icons.spa_outlined,
+        () => openAdhkar('morning'), const Color(0xFF6F8B54)),
+      (tr('المسابقة', 'Quiz'), Icons.emoji_events_outlined,
+        () => showMainTab(1), const Color(0xFFAF8849)),
+      (tr('اليوم', 'Today'), Icons.today_outlined,
+        () => showMainTab(3), const Color(0xFF90734B)),
+      (tr('السبحة', 'Tasbih'), Icons.blur_circular_rounded,
+        openTasbih, const Color(0xFF288060)),
+      (tr('الورد اليومي', 'Daily reading'),
+        Icons.auto_stories_outlined, openDaily,
+        const Color(0xFF95784C)),
+      (tr('الإعدادات', 'Settings'),
+        Icons.tune_rounded, settings, const Color(0xFF5C7B72)),
     ];
     return LayoutBuilder(builder: (context, constraints) {
       final width = (constraints.maxWidth - 20) / 3;
@@ -236,7 +244,7 @@ extension NusukInspiredRawda on RawdaState {
               ),
             ),
             IconButton.filledTonal(
-              onPressed: openPrayerMonth,
+              onPressed: openPrayerToday,
               tooltip: tr('التقويم', 'Calendar'),
               icon: const Icon(Icons.calendar_month_outlined),
             ),
@@ -371,7 +379,7 @@ extension NusukInspiredRawda on RawdaState {
                           ),
                           OutlinedButton(
                             onPressed:
-                                next == null ? prayerSettings : openPrayerMonth,
+                                next == null ? prayerSettings : openPrayerToday,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.white,
                               side: const BorderSide(
@@ -392,7 +400,7 @@ extension NusukInspiredRawda on RawdaState {
         ),
         rawdaSectionTitle(
           tr('مواقيت الصلاة', 'Prayer times'),
-          onTap: openPrayerMonth,
+          onTap: openPrayerToday,
         ),
         SizedBox(
           height: 100,
@@ -441,6 +449,8 @@ extension NusukInspiredRawda on RawdaState {
         ),
         rawdaSectionTitle(tr('اكتشف الروضة', 'Explore Rawda')),
         rawdaShortcutGrid(),
+        const SizedBox(height: 11),
+        rawdaTasbihTeaser(),
         rawdaSectionTitle(
           tr('وردك اليومي', 'Your daily reading'),
           onTap: openDaily,
@@ -503,67 +513,133 @@ extension NusukInspiredRawda on RawdaState {
   }
 
   Widget nusukInspiredQuran() {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 30),
-      children: [
-        sectionHero(
-          tr('القرآن الكريم', 'The Holy Quran'),
-          tr('اقرأ واستمع إلى تلاوة السور', 'Read and listen to recitations'),
-          Icons.menu_book_rounded,
-        ),
-        const SizedBox(height: 12),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.headphones_rounded, color: rawdaGreen),
-            title: Text(tr('التلاوات القرآنية', 'Quran recitations')),
-            subtitle: Text(tr(
-                'افتح أي سورة واختر القارئ ثم اضغط تشغيل',
-                'Open a surah, select a reciter and tap Play')),
-            onTap: openQuran,
-          ),
-        ),
-        rawdaSectionTitle(
-          tr('سور القرآن الكريم', 'Surahs of the Quran'),
-          onTap: openQuran,
-          action: tr('البحث', 'Search'),
-        ),
-        if (chapters.isEmpty)
-          FilledButton.icon(
-            onPressed: openQuran,
-            icon: const Icon(Icons.menu_book_outlined),
-            label: Text(tr('افتح المصحف', 'Open Quran')),
-          ),
-        for (final chapter in chapters)
-          Card(
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: rawdaGold.withValues(alpha: .16),
-                foregroundColor: dark ? rawdaGold : rawdaGreen,
-                child: Text(chapter['id'].toString()),
+    final needle = plain(quranTabQuery.trim()).toLowerCase();
+    final matched = chapters.where((v) {
+      if (needle.isEmpty) return true;
+      return plain(v['name_arabic'].toString())
+            .toLowerCase().contains(needle) ||
+          v['name_simple'].toString().toLowerCase()
+            .contains(needle) ||
+          v['id'].toString() == needle;
+    }).toList();
+    // Build only visible rows, not the entire 114-surah list.
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+      itemCount: matched.length + 4,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return rawdaFeatureHero(
+            tr('القرآن الكريم', 'Holy Quran'),
+            tr('اقرأ واستمع إلى التلاوات من داخل المصحف',
+               'Read and listen to Quran recitations'),
+            Icons.auto_stories_rounded,
+          );
+        }
+        if (index == 1) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 13),
+            child: Wrap(spacing: 8, runSpacing: 8, children: [
+              FilledButton.tonalIcon(
+                onPressed: openQuran,
+                icon: const Icon(Icons.menu_book_outlined, size: 18),
+                label: Text(tr('السور', 'Surahs')),
               ),
-              title: Text(ar
-                  ? "سورة ${chapter['name_arabic']}"
-                  : "Surah ${chapter['name_simple']}"),
-              subtitle: Text("${chapter['verses_count']} ${tr('آية', 'verses')}"),
-              trailing: const Icon(Icons.play_circle_outline_rounded,
-                  color: rawdaGold),
-              onTap: () => openSurah(chapter['id'] as int),
+              OutlinedButton.icon(
+                onPressed: openJuz,
+                icon: const Icon(Icons.format_list_numbered_rounded, size: 18),
+                label: Text(tr('الأجزاء', 'Juz')),
+              ),
+              OutlinedButton.icon(
+                onPressed: openBookmarks,
+                icon: const Icon(Icons.bookmark_outline_rounded, size: 18),
+                label: Text(tr('العلامات', 'Bookmarks')),
+              ),
+            ]),
+          );
+        }
+        if (index == 2) {
+          return TextField(
+            onChanged: (v) {
+              quranTabQuery = v;
+              refreshSettings();
+            },
+            decoration: InputDecoration(
+              hintText: tr('ابحث عن سورة', 'Search for a surah'),
+              prefixIcon: const Icon(Icons.search_rounded),
             ),
+          );
+        }
+        if (index == 3) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 8),
+            child: Row(children: [
+              Expanded(child: Text(
+                tr('السور الـ ١١٤', '114 surahs'),
+                style: const TextStyle(
+                  fontSize: 17, fontWeight: FontWeight.w800,
+                ))),
+              if (chapters.isEmpty)
+                TextButton(
+                  onPressed: openQuran,
+                  child: Text(tr('افتح المصحف', 'Open Quran')),
+                )
+              else
+                Text(matched.length.toString(),
+                  style: const TextStyle(
+                    fontFamily: 'RawdaLatin',
+                    fontSize: 13, color: rawdaGold,
+                  )),
+            ]),
+          );
+        }
+        final chapter = matched[index - 4];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 7),
+          clipBehavior: Clip.antiAlias,
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 13, vertical: 4,
+            ),
+            leading: CircleAvatar(
+              radius: 23,
+              backgroundColor: rawdaGold.withValues(alpha: .20),
+              foregroundColor: dark ? rawdaGold : rawdaGreen,
+              child: Text(chapter['id'].toString(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontFamily: 'RawdaLatin',
+                )),
+            ),
+            title: Text(ar
+                ? 'سورة ' + chapter['name_arabic'].toString()
+                : 'Surah ' + chapter['name_simple'].toString(),
+              style: const TextStyle(fontWeight: FontWeight.w700)),
+            subtitle: Text(chapter['verses_count'].toString() +
+              ' ' + tr('آية', 'verses'),
+              style: const TextStyle(fontSize: 11)),
+            trailing: const Icon(Icons.menu_book_rounded,
+              size: 27, color: rawdaGold),
+            onTap: () => openSurah(chapter['id'] as int),
           ),
-      ],
+        );
+      },
     );
   }
 
   Widget nusukInspiredToday() {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 30),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 34),
       children: [
-        sectionHero(
-          tr('يومك مع الروضة', 'Your day with Rawda'),
-          tr('أذكار وورد وعبادات في مكان واحد',
-              'Daily reading, remembrance and worship'),
-          Icons.spa_outlined,
+        rawdaFeatureHero(
+          tr('اليوم', 'Today'),
+          tr('آيات وأحاديث وأذكار ووردك في مكان واحد',
+             'Verses, hadith, adhkar and your daily reading'),
+          Icons.wb_sunny_outlined,
         ),
+        const SizedBox(height: 12),
+        rawdaDailyAyah(),
+        const SizedBox(height: 6),
+        rawdaDailyHadith(),
         rawdaSectionTitle(tr('أذكار اليوم', 'Daily remembrance')),
         tile(tr('أذكار الصباح', 'Morning adhkar'),
             Icons.wb_sunny_outlined, () => openAdhkar('morning')),
@@ -573,15 +649,18 @@ extension NusukInspiredRawda on RawdaState {
             Icons.mosque_outlined, () => openAdhkar('prayer')),
         tile(tr('أذكار النوم', 'Bedtime adhkar'),
             Icons.bedtime_outlined, () => openAdhkar('sleep')),
+        rawdaSectionTitle(tr('المسبحة', 'Tasbih')),
+        rawdaTasbihTeaser(),
         rawdaSectionTitle(tr('عباداتك', 'Your worship')),
         tile(tr('وردك وختمتك', 'Daily reading & khatma'),
             Icons.auto_stories_rounded, openDaily),
         tile(tr('متابعة الصلاة والصيام', 'Prayer & fasting tracker'),
             Icons.fact_check_outlined, openTracker),
         tile(tr('مواقيت الصلاة', 'Prayer timetable'),
-            Icons.calendar_month_outlined, openPrayerMonth),
+            Icons.calendar_month_outlined, openPrayerToday),
         tile(tr('إعدادات الأذان', 'Adhan settings'),
-            Icons.notifications_active_outlined, openPrayerNotifications),
+            Icons.notifications_active_outlined,
+            openPrayerNotifications),
       ],
     );
   }
