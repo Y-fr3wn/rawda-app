@@ -37,6 +37,10 @@ jobs:
             rm -rf rawda/lib/lib
             echo 'Applied redesigned Rawda Flutter UI from editable/lib.'
           fi
+          if [ -f editable/pubspec.yaml ]; then
+            cp editable/pubspec.yaml rawda/pubspec.yaml
+            echo 'Applied current Rawda version and dependencies.'
+          fi
           if [ -f editable/test/app_test.dart ]; then
             cp editable/test/app_test.dart rawda/test/app_test.dart
             echo 'Using updated visual navigation regression test.'
