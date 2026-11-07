@@ -26,18 +26,12 @@ class RawdaFirebaseBackend {
   DocumentReference<Map<String, dynamic>> user(String owner) =>
       store.collection('users').doc(owner);
 
-  Future<void> sendVerification(User user) {
-    const hasReturnPage = bool.fromEnvironment('RAWDA_FIREBASE_EMAIL_RETURN');
-    const emulator = String.fromEnvironment('RAWDA_FIREBASE_EMULATOR');
-    if (!hasReturnPage || emulator.isNotEmpty) {
-      return user.sendEmailVerification();
-    }
-    return user.sendEmailVerification(
-      ActionCodeSettings(
-        url: 'https://rawda-7806b.web.app/verified/',
-        handleCodeInApp: false,
-      ),
-    );
+  /// Use Firebase's built-in email action handler for reliable verification.
+  /// A custom continue URL must not be used until its domain, Hosting route,
+  /// and email templates are provisioned and tested in Firebase Console.
+  Future<void> sendVerification(User user) async {
+    if (user.emailVerified) return;
+    await user.sendEmailVerification();
   }
 
   Future<bool> refreshVerification() async {

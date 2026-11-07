@@ -546,6 +546,34 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
     }
     if (e is firebase_auth.FirebaseAuthException) {
       switch (e.code) {
+        case 'operation-not-allowed':
+          return tr(
+            'خدمة التسجيل بالبريد غير مفعّلة في Firebase. فعّل Email/Password من Authentication.',
+            'Email/Password sign-in is disabled in Firebase Authentication.',
+          );
+        case 'invalid-continue-uri':
+        case 'unauthorized-continue-uri':
+        case 'invalid-dynamic-link-domain':
+          return tr(
+            'رابط تأكيد البريد غير معتمد في Firebase. راجع الدومينات المسموحة وقالب الرسالة.',
+            'Email verification link is not configured. Check authorized domains and the email template.',
+          );
+        case 'network-request-failed':
+          return tr(
+            'تعذّر الاتصال بـ Firebase. تأكد من الإنترنت وجرّب مرة تانية.',
+            'Cannot reach Firebase. Check your internet connection and retry.',
+          );
+        case 'quota-exceeded':
+        case 'too-many-requests':
+          return tr(
+            'وصلنا لحد إرسال الرسائل مؤقتًا. جرّب مرة تانية لاحقًا.',
+            'Firebase temporarily limited verification requests. Retry later.',
+          );
+        case 'invalid-email':
+          return tr(
+            'عنوان البريد الإلكتروني غير صحيح.',
+            'The email address is invalid.',
+          );
         case 'email-already-in-use':
           return tr(
             'الإيميل مسجل بالفعل. جرّب تسجيل الدخول.',
@@ -563,11 +591,7 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
             'سجّل خروج وادخل مرة تانية قبل تغيير كلمة المرور.',
             'Sign in again before changing the password.',
           );
-        case 'too-many-requests':
-          return tr(
-            'انتظر شوية قبل المحاولة مرة تانية.',
-            'Wait a little before retrying.',
-          );
+
       }
     }
     if (s.contains('QUESTION_IN_USE')) {
@@ -3956,8 +3980,13 @@ class _AuthScreenState extends State<AuthScreen> {
       );
       final user = credential.user!;
       await a.saveFirebaseConsent(user.uid);
-      await user.updateDisplayName(name.text.trim());
+      // Send the essential verification request before optional profile edits.
       await backend.sendVerification(user);
+      try {
+        await user.updateDisplayName(name.text.trim());
+      } catch (_) {
+        // Name editing can be retried after the email has been confirmed.
+      }
     } else {
       final credential = await auth.signInWithEmailAndPassword(
         email: email.text.trim(),
@@ -3985,8 +4014,8 @@ class _AuthScreenState extends State<AuthScreen> {
       setState(() {
         messageOk = true;
         message = a.tr(
-          'افتح رابط التأكيد في إيميلك، وبعدها دوس «أكدت بريدي».',
-          'Open the verification link in your email, then tap “I verified my email”.',
+          'طلبنا إرسال رابط التأكيد إلى ${email.text.trim()}. راجع الوارد والرسائل غير المرغوب فيها، وبعدها دوس «أكدت بريدي».',
+          'Verification email requested for ${email.text.trim()}. Check your inbox and spam, then tap “I verified my email”.',
         );
       });
     }
@@ -4022,8 +4051,8 @@ class _AuthScreenState extends State<AuthScreen> {
           setState(() {
             messageOk = true;
             message = a.tr(
-              'بعتنا رابط تأكيد جديد على إيميلك.',
-              'A new verification link was sent.',
+              'طلبنا إرسال رابط تأكيد جديد إلى ${user.email ?? 'بريدك'}. راجع الوارد والرسائل غير المرغوب فيها.',
+              'New verification email requested for ${user.email ?? 'your email'}. Check inbox and spam.',
             );
           });
         }

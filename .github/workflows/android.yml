@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: rawda-1-4-5-${{ github.ref }}
+  group: rawda-1-4-6-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   android:
@@ -87,14 +87,14 @@ jobs:
         run: bash android/gradlew -p android :app:testDebugUnitTest --no-daemon
       - name: Build Firebase debug APK
         working-directory: rawda
-        run: flutter build apk --debug --no-pub --dart-define=RAWDA_USE_FIREBASE=true --dart-define=RAWDA_FIREBASE_EMAIL_RETURN=true
+        run: flutter build apk --debug --no-pub --dart-define=RAWDA_USE_FIREBASE=true
       - name: Build optimized profile APK (AOT for smoother UI)
         working-directory: rawda
-        run: flutter build apk --profile --no-pub --dart-define=RAWDA_USE_FIREBASE=true --dart-define=RAWDA_FIREBASE_EMAIL_RETURN=true
+        run: flutter build apk --profile --no-pub --dart-define=RAWDA_USE_FIREBASE=true
       - name: Upload optimized installable APK
         uses: actions/upload-artifact@v4
         with:
-          name: Rawda-1.4.5-FAST-APK
+          name: Rawda-1.4.6-FAST-APK
           path: rawda/build/app/outputs/flutter-apk/app-profile.apk
           if-no-files-found: error
           retention-days: 14
@@ -116,13 +116,13 @@ jobs:
         env:
           RAWDA_KEYSTORE_PASSWORD: ${{ secrets.RAWDA_KEYSTORE_PASSWORD }}
         run: |
-          flutter build apk --release --no-pub --dart-define=RAWDA_USE_FIREBASE=true --dart-define=RAWDA_FIREBASE_EMAIL_RETURN=true
-          flutter build appbundle --release --no-pub --dart-define=RAWDA_USE_FIREBASE=true --dart-define=RAWDA_FIREBASE_EMAIL_RETURN=true
+          flutter build apk --release --no-pub --dart-define=RAWDA_USE_FIREBASE=true
+          flutter build appbundle --release --no-pub --dart-define=RAWDA_USE_FIREBASE=true
       - name: Upload signed APK
         if: env.HAS_RELEASE_KEY == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: Rawda-1.4.5-SIGNED-APK
+          name: Rawda-1.4.6-SIGNED-APK
           path: rawda/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 14
@@ -130,7 +130,7 @@ jobs:
         if: env.HAS_RELEASE_KEY == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: Rawda-1.4.5-SIGNED-AAB
+          name: Rawda-1.4.6-SIGNED-AAB
           path: rawda/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14
@@ -138,7 +138,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Rawda-1.4.5-UI-Screenshots
+          name: Rawda-1.4.6-UI-Screenshots
           path: rawda/test-results/*.png
           if-no-files-found: warn
           retention-days: 14
