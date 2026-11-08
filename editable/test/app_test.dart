@@ -326,6 +326,10 @@ void main() {
       expect(find.text('الصلاة القادمة'), findsOneWidget);
       expect(a.account['profile']['display_name'], 'يوسف');
       await screenshot(t, 'home');
+      expect(find.text('اتجاه القبلة'), findsOneWidget);
+      await t.ensureVisible(find.text('اتجاه القبلة'));
+      await t.pumpAndSettle();
+      await screenshot(t, 'home-qibla-button');
       a.push('تدريب', (_) => PracticeScreen(app: a));
       await t.pumpAndSettle();
       expect(find.textContaining('بلا نقاط'), findsOneWidget);

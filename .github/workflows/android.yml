@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: rawda-1-4-8-${{ github.ref }}
+  group: rawda-1-4-9-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   android:
@@ -94,7 +94,7 @@ jobs:
       - name: Upload optimized installable APK
         uses: actions/upload-artifact@v4
         with:
-          name: Rawda-1.4.8-FAST-APK
+          name: Rawda-1.4.9-FAST-APK
           path: rawda/build/app/outputs/flutter-apk/app-profile.apk
           if-no-files-found: error
           retention-days: 14
@@ -122,7 +122,7 @@ jobs:
         if: env.HAS_RELEASE_KEY == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: Rawda-1.4.8-SIGNED-APK
+          name: Rawda-1.4.9-SIGNED-APK
           path: rawda/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 14
@@ -130,7 +130,7 @@ jobs:
         if: env.HAS_RELEASE_KEY == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: Rawda-1.4.8-SIGNED-AAB
+          name: Rawda-1.4.9-SIGNED-AAB
           path: rawda/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14
@@ -138,7 +138,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Rawda-1.4.8-UI-Screenshots
+          name: Rawda-1.4.9-UI-Screenshots
           path: rawda/test-results/*.png
           if-no-files-found: warn
           retention-days: 14

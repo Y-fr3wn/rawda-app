@@ -271,6 +271,94 @@ extension RawdaReferenceFidelity on RawdaState {
     );
   }
 
+  /// Dedicated, always-visible Qibla entry without replacing the original
+  /// five navigation tabs or changing any bearing/location calculations.
+  Widget referenceQiblaButton() {
+    return Material(
+      color: _v2Emerald,
+      borderRadius: BorderRadius.circular(17),
+      child: InkWell(
+        onTap: openQibla,
+        borderRadius: BorderRadius.circular(17),
+        child: Container(
+          height: 74,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(17),
+            border: Border.all(color: _v2Gold, width: 1.3),
+          ),
+          child: Stack(
+            children: [
+              const Positioned.fill(
+                child: CustomPaint(
+                  painter: RawdaGoldCorners(strong: true),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF165E47),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: _v2Gold),
+                      ),
+                      child: const Icon(
+                        Icons.explore_rounded,
+                        color: Color(0xFFFFDF9D),
+                        size: 31,
+                      ),
+                    ),
+                    const SizedBox(width: 13),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            tr('اتجاه القبلة', 'Qibla direction'),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            tr(
+                              'اعرف اتجاه الكعبة بالبوصلة',
+                              'Find the Kaaba direction with your compass',
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Color(0xFFEACF96),
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      ar ? Icons.chevron_left_rounded :
+                        Icons.chevron_right_rounded,
+                      color: _v2Gold,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget referenceHome() {
     final shortcuts = <(IconData, String, VoidCallback)>[
       (Icons.access_time_rounded,
@@ -316,7 +404,9 @@ extension RawdaReferenceFidelity on RawdaState {
               shortcuts[i].$1, shortcuts[i].$2,
               shortcuts[i].$3),
           ),
-          const SizedBox(height: 13),
+          const SizedBox(height: 12),
+          referenceQiblaButton(),
+          const SizedBox(height: 10),
           rawdaTasbihTeaser(),
           if (activeIqama != null)
             framedCard(child: Text(
