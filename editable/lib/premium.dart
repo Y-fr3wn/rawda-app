@@ -1,7 +1,7 @@
 part of 'main.dart';
 
-const rawdaGreen = Color(0xFF183F33);
-const rawdaGold = Color(0xFFC6A76A);
+const rawdaGreen = RawdaTheme.deepEmerald;
+const rawdaGold = RawdaTheme.gold;
 
 /// Original Rawda illustration: a domed mosque and minarets, with enough
 /// contrast for the clock and prayer controls on top. No Nusuk imagery is used.

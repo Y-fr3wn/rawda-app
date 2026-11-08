@@ -24,6 +24,7 @@ part 'nusuk_ui.dart';
 part 'refined_settings.dart';
 part 'visual_kit.dart';
 part 'visual_fidelity.dart';
+part 'rawda_theme.dart';
 
 const bridge = MethodChannel('com.rawda/native');
 const sensors = EventChannel('com.rawda/compass');
@@ -1351,11 +1352,11 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
           surface: dark ? const Color(0xFF1B3028) : const Color(0xFFFFFBF2),
           onSurface: dark ? const Color(0xFFF5EEE0) : const Color(0xFF193C32),
         ),
-        fontFamily: ar ? 'RawdaArabic' : 'RawdaLatin',
-        fontFamilyFallback: const ['RawdaArabic', 'RawdaLatin'],
+        fontFamily: ar ? RawdaTheme.arabicFont : RawdaTheme.latinFont,
+        fontFamilyFallback: const [RawdaTheme.arabicFont, RawdaTheme.latinFont],
         scaffoldBackgroundColor: dark
             ? const Color(0xFF131F1A)
-            : const Color(0xFFFFF7E9),
+            : RawdaTheme.cream,
         appBarTheme: AppBarTheme(
           backgroundColor: dark ? const Color(0xFF092D26) : rawdaGreen,
           foregroundColor: const Color(0xFFF2DBAD),
@@ -1372,8 +1373,8 @@ class RawdaState extends State<Rawda> with WidgetsBindingObserver {
           backgroundColor: dark
               ? const Color(0xFF14271F)
               : const Color(0xFFFFFCF4),
-          indicatorColor: const Color(0xFF064631),
-          height: 68,
+          indicatorColor: RawdaTheme.emerald,
+          height: RawdaTheme.bottomNavHeight,
           labelTextStyle: WidgetStateProperty.resolveWith(
             (states) => TextStyle(
               fontSize: 10,

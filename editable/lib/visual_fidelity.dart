@@ -3,9 +3,9 @@ part of 'main.dart';
 /// A screen-level composition based on Rawda's approved reference mockups.
 /// Text, accounts, times and buttons remain real Flutter controls, not a
 /// flattened screenshot of the reference.
-const _v2Paper = Color(0xFFFFF9EF);
-const _v2Emerald = Color(0xFF064631);
-const _v2Gold = Color(0xFFD8AD64);
+const _v2Paper = RawdaTheme.paper;
+const _v2Emerald = RawdaTheme.emerald;
+const _v2Gold = RawdaTheme.gold;
 
 class RawdaGoldCorners extends CustomPainter {
   const RawdaGoldCorners({this.strong = false});
