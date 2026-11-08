@@ -1250,22 +1250,24 @@ extension _PremiumAuth on _AuthScreenState {
   Widget authPremium() {
     final a = widget.app;
     return Scaffold(
+      backgroundColor: const Color(0xFFFFF7E9),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
             child: ListView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               children: [
                 RawdaReferenceLoginBanner(arabic: a.ar),
-                const SizedBox(height: 27),
+                const SizedBox(height: 8),
                 Text(
                   signup
                       ? a.tr('أهلًا بك في الروضة', 'Welcome to Rawda')
                       : a.tr('نورت الروضة', 'Welcome back'),
                   style: const TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 19,
+                    color: Color(0xFF063B2E),
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -1281,7 +1283,7 @@ extension _PremiumAuth on _AuthScreenState {
                         ),
                   style: const TextStyle(fontSize: 12, color: rawdaGold),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
                 if (signup) ...[
                   TextField(
                     controller: name,
@@ -1293,7 +1295,7 @@ extension _PremiumAuth on _AuthScreenState {
                       prefixIcon: const Icon(Icons.person_outline),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                 ],
                 TextField(
                   controller: email,
@@ -1301,12 +1303,12 @@ extension _PremiumAuth on _AuthScreenState {
                   autofillHints: const [AutofillHints.email],
                   textDirection: TextDirection.ltr,
                   decoration: InputDecoration(
-                    labelText: a.tr('الإيميل', 'Email'),
+                    labelText: a.tr('البريد الإلكتروني', 'Email'),
                     errorText: emailError,
-                    prefixIcon: const Icon(Icons.alternate_email),
+                    prefixIcon: const Icon(Icons.mail_outline, color: Color(0xFF0F5928)),
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
                 TextField(
                   controller: password,
                   obscureText: !reveal,
@@ -1316,7 +1318,7 @@ extension _PremiumAuth on _AuthScreenState {
                   decoration: InputDecoration(
                     labelText: a.tr('كلمة المرور', 'Password'),
                     errorText: passwordError,
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF0F5928)),
                     suffixIcon: IconButton(
                       tooltip: a.tr(
                         'إظهار أو إخفاء كلمة المرور',
@@ -1411,7 +1413,14 @@ extension _PremiumAuth on _AuthScreenState {
                       ],
                     ),
                   ),
-                FilledButton(
+                SizedBox(
+                  height: 46,
+                  child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF075438),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                   onPressed: loading ? null : () => submit(),
                   child: loading
                       ? const SizedBox(
@@ -1425,7 +1434,8 @@ extension _PremiumAuth on _AuthScreenState {
                               : a.tr('دخول', 'Sign in'),
                         ),
                 ),
-                const SizedBox(height: 12),
+                ),
+                const SizedBox(height: 8),
                 TextButton(
                   onPressed: loading
                       ? null
